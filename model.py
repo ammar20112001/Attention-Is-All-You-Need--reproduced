@@ -58,3 +58,103 @@ class PositionalEncodings(nn.Module):
         '''
         x = x + (self.pe[:, :x.shape[1], :]).requires_grad_(False) # This operation automatically broadcasts the Positional Encodings (pe) across all batches of x
         return self.dropout(x)
+
+class x(nn.Module):
+
+    def __init__(self, d_model, q, k, v, h, mask, dropout: float):
+        super().__init__()
+        self.d_model = d_model
+        self.h = h
+        self.mask = mask
+        self.dropout = dropout
+
+        self.dk = d_model // h
+        self.dv = d_model // h
+        
+        # Create weight matrices for Quer, Key, and Value
+        self.w_q = nn.Linear(d_model, d_model, bias=False)
+        self.w_k = nn.Linear(d_model, d_model, bias=False)
+        self.w_v = nn.Linear(d_model, d_model, bias=False)
+        self.w_o = nn.Linear(d_model, d_model, bias=False)
+
+    def forward(self, q, k, v):
+        '''
+        Arguments:
+            q --> (B, S, d_model)
+            k --> (B, S, d_model)
+            v --> (B, S, d_model)
+
+        Return:
+            x --> (B, S, d_model)
+            a --> 
+        
+        Operations:
+            - Query, key, and value are multiplyed with matrices w_q, w_k, and w_v respectively
+                q/k/v * w_q --> (B, S, d_model) * (d_model, d_model) --> (B, S, d_model)
+            
+            - Query, key, and value are divided into `h` number of HEADS
+                q/k --> (B, S, d_model) --> (B, S, h, dk) --> (B, h, S, dk)
+                v --> (B, S, d_model) --> (B, S, h, dv) --> (B, h, S, dv)
+            
+            - Attention scores are calculated
+                HEAD(s) --> softmax( (q * k.T) / sqrt(dk)) * v 
+                        --> ((B, h, S, dk) * (B, h, dk, S)) * (B, h, S, dv)
+                        --> (B, h, S, S) * (B, h, S, dv)
+                        --> (B, h, S, dv)
+
+            - All HEADs are concatenated 
+                MultiHead   --> Concat(HEAD_1, ..., HEAD_h) 
+                            --> (S, dk*h) 
+                            --> (S, d_model)
+
+            - MultiHead * w_o   --> (S, d_model) 
+                                --> (d_model, d_model) 
+                                --> (S, d_model)   
+        '''
+        
+        # Query, key, and value are multiplyed with matrices w_q, w_k, and w_v respectively
+        # query/key/value * w_q --> (B, S, d_model) * (d_model, d_model) --> (B, S, d_model)
+        query = self.w_q(q)
+        key = self.w_k(k)
+        value = self.w_v(v)
+
+        # Query, key, and value are divided into `h` number of HEADS
+        # q/k --> (B, S, d_model) --> (B, S, h, dk) --> (B, h, S, dk)
+        # v --> (B, S, d_model) --> (B, S, h, dv) --> (B, h, S, dv)
+        query = query.view(query[0], query[1], self.h, self.dk).transpose(1, 2)
+        key = key.view(key[0], key[1], self.h, self.dk).transpose(1, 2)
+        value = value.view(value[0], value[1], self.h, self.dv).transpose(1, 2)
+
+        # Attention scores are calculated
+        # HEAD(s) --> softmax( (q * k.T) / sqrt(dk)) * v 
+
+        # --> ((B, h, S, dk) * (B, h, dk, S)) --> (B, h, S, S)
+        attention_scores = (query @ key.transpose(-2, -1)) / math.sqrt(self.dk)
+
+        if self.mask is not None:
+            # Write a very low value (indicating -inf) to the positions where mask == 0
+            attention_scores.masked_fill_(self.mask == 0, -1e9)
+        
+        # Apply softmax --> (B, h, S, S)
+        attention_scores = attention_scores.softmax(dim=-1) 
+
+        if self.dropout is not None:
+            attention_scores = self.dropout(attention_scores)
+
+        # (B, h, S, S) * (B, h, S, dv) --> (B, h, S, dv)
+        attention = attention_scores @ value
+
+        # All HEADs are concatenated
+        # Concat(HEAD_1, ..., HEAD_h)
+        # (B, h, S, dv) --> (B, S, h, dv) --> (batch, S, d_model)
+        x = attention_scores.transpose(1, 2).contiguous().view(attention_scores[0], -1, self.h*self.dv)
+
+        # Multiply by w_o
+        # (B, S, d_model) * (d_model, d_model) --> (B, S, d_model)
+        return self.w_o(x)
+
+class AddNorm():
+    pass
+
+class FeedForward():
+    pass
