@@ -153,8 +153,17 @@ class x(nn.Module):
         # (B, S, d_model) * (d_model, d_model) --> (B, S, d_model)
         return self.w_o(x)
 
-class AddNorm():
-    pass
+class FeedForward(nn.Module):
 
-class FeedForward():
+    def __init__(self, d_model: int, d_fc: int, dropout: float):
+        super().__init__()
+        # Initialize linear layers
+        self.fc1 = nn.Linear(d_model, d_fc)
+        self.fc2 = nn.Linear(d_fc, d_model)
+        self.dropout = dropout
+
+    def forward(self, x):
+        return self.fc2(self.dropout(torch.relu(self.fc1(x))))
+
+class AddNorm(nn.Module):
     pass
