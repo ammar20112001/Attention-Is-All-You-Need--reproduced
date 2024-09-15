@@ -186,3 +186,13 @@ class AddNorm(nn.Module):
         # Return normalized values
         # (B, S, d_model)
         return self.alpha((x - mean) / (math.sqrt(std**2 + self.eps))) + self.beta
+    
+class ResidualConnection(nn.Module):
+
+    def __init__(self, d_model: int, dropout: float):
+        super().__init__(self)
+        self.AddNorm = AddNorm(d_model)
+        self.dropout(dropout)
+
+    def forward(self, x, sublayer):
+        x = x + self.dropout((self.AddNorm(sublayer(x))))
