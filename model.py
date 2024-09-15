@@ -61,7 +61,7 @@ class PositionalEncodings(nn.Module):
 
 class x(nn.Module):
 
-    def __init__(self, d_model, q, k, v, h, mask, dropout: float):
+    def __init__(self, d_model, q, k, v, h, mask, dropout: float) -> None:
         super().__init__()
         self.d_model = d_model
         self.h = h
@@ -155,7 +155,7 @@ class x(nn.Module):
 
 class FeedForward(nn.Module):
 
-    def __init__(self, d_model: int, d_fc: int, dropout: float):
+    def __init__(self, d_model: int, d_fc: int, dropout: float) -> None:
         super().__init__()
         # Initialize linear layers
         self.fc1 = nn.Linear(d_model, d_fc)
@@ -163,7 +163,26 @@ class FeedForward(nn.Module):
         self.dropout = dropout
 
     def forward(self, x):
+        # (B, S, d_model) --> (B, S, d_ff) --> (B, S, d_model)
         return self.fc2(self.dropout(torch.relu(self.fc1(x))))
 
 class AddNorm(nn.Module):
-    pass
+    
+    def __init__(self, d_model: int, eps: float = 1e-6) -> None:
+        super().__init__(self)
+        self.eps = eps
+        self.alpha = nn.Parameter(torch.ones(d_model)) # Learnable parameter
+        self.beta = nn.Parameter(torch.zeros(d_model)) # Learnable parameter
+        #self.layer_norm = nn.LayerNorm(d_model)
+
+    def forward(self, x):
+        # Calcualte mean of x
+        # x --> (B, S, d_model)
+        mean = x.mean(dim=-1, keepdim=True) # x --> (B, S, 1)
+
+        # Calculate standard deviation
+        std = x.std(dim=-1, keepdim=True) # x --> (B, S, 1)
+
+        # Return normalized values
+        # (B, S, d_model)
+        return self.alpha((x - mean) / (math.sqrt(std**2 + self.eps))) + self.beta
