@@ -59,9 +59,9 @@ class PositionalEncodings(nn.Module):
         x = x + (self.pe[:, :x.shape[1], :]).requires_grad_(False) # This operation automatically broadcasts the Positional Encodings (pe) across all batches of x
         return self.dropout(x)
 
-class x(nn.Module):
+class MultiHeadAttention(nn.Module):
 
-    def __init__(self, d_model, q, k, v, h, mask, dropout: float) -> None:
+    def __init__(self, d_model, h, mask, dropout: float) -> None:
         super().__init__()
         self.d_model = d_model
         self.h = h
@@ -196,3 +196,38 @@ class ResidualConnection(nn.Module):
 
     def forward(self, x, sublayer):
         x = x + self.dropout((self.AddNorm(sublayer(x))))
+
+class EncoderBlock(nn.Module):
+
+    def __init__(self,
+                 d_model: int,
+                 multi_head_attention_block: MultiHeadAttention,
+                 feed_forward_block: FeedForward,
+                 dropout: float
+                 ):
+        super().__init__(self)
+        self.multi_head_attention_block = multi_head_attention_block
+        self.feed_forward_block = feed_forward_block
+        self.dropout = dropout
+        self.residual_connection_block = nn.ModuleList([ResidualConnection(d_model, dropout) for _ in range(2)])
+
+    def forward(self, x, src_mask):
+        x = self.residual_connection_block[0](x, lambda x: self.multi_head_attention_block(x, x, x, src_mask))
+        x = self.residual_connection_block[1](x, self.feed_forward_block)
+        return x
+
+class Encoder(nn.Module):
+
+    def __init__(self):
+        super().__init__(self)
+    
+    def forward(self, x):
+        pass
+
+class Decoder(nn.Module):
+
+    def __init__(self):
+        super().__init__(self)
+    
+    def forward(self, x):
+        pass    
