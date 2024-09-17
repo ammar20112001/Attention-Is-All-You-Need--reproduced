@@ -262,3 +262,19 @@ class Decoder(nn.Module):
             x = layer(x, encoder_output, src_mask, tgt_mask)
         return self.norm(x)
     
+class ProjectionLayer(nn.Module):
+
+    def __init__(self, d_model: int, vocab_size: int):
+        super().__init__()
+        self.proj = nn.Linear(d_model, vocab_size)
+        pass
+
+    def forward(self, x):
+        '''
+        Arguument:
+            x --> (B, S, d_model)
+
+        Return:
+            x --> (B, S, V)
+        '''
+        return self.proj(x)
