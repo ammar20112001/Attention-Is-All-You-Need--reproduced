@@ -252,8 +252,13 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
 
-    def __init__(self):
+    def __init__(self, d_model, layers: nn.ModuleList) -> None:
         super().__init__(self)
+        self.layers = layers
+        self.norm = LayerNormalization(d_model)
     
-    def forward(self, x):
-        pass    
+    def forward(self, x, encoder_output, src_mask, tgt_mask):
+        for layer in self.layers:
+            x = layer(x, encoder_output, src_mask, tgt_mask)
+        return self.norm(x)
+    
