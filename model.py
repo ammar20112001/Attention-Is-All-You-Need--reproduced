@@ -166,7 +166,7 @@ class FeedForward(nn.Module):
         # (B, S, d_model) --> (B, S, d_ff) --> (B, S, d_model)
         return self.fc2(self.dropout(torch.relu(self.fc1(x))))
 
-class AddNorm(nn.Module):
+class LayerNormalization(nn.Module):
     
     def __init__(self, d_model: int, eps: float = 1e-6) -> None:
         super().__init__(self)
@@ -191,11 +191,11 @@ class ResidualConnection(nn.Module):
 
     def __init__(self, d_model: int, dropout: float):
         super().__init__(self)
-        self.AddNorm = AddNorm(d_model)
+        self.norm = LayerNormalization(d_model)
         self.dropout(dropout)
 
     def forward(self, x, sublayer):
-        x = x + self.dropout((self.AddNorm(sublayer(x))))
+        x = x + self.dropout((sublayer(self.norm(x))))
 
 class EncoderBlock(nn.Module):
 
@@ -240,16 +240,25 @@ class DecoderBlock(nn.Module):
 
 class Encoder(nn.Module):
 
-    def __init__(self):
+    def __init__(self, d_model, layers: nn.ModuleList) -> None:
         super().__init__(self)
+        self.layers = layers
+        self.norm = LayerNormalization(d_model)
     
-    def forward(self, x):
-        pass
+    def forward(self, x, mask):
+        for layer in self.layers:
+            x = layer(x, mask)
+        return self.norm(x)
 
 class Decoder(nn.Module):
 
-    def __init__(self):
+    def __init__(self, d_model, layers: nn.ModuleList) -> None:
         super().__init__(self)
+        self.layers = layers
+        self.norm = LayerNormalization(d_model)
     
-    def forward(self, x):
-        pass    
+    def forward(self, x, encoder_output, src_mask, tgt_mask):
+        for layer in self.layers:
+            x = layer(x, encoder_output, src_mask, tgt_mask)
+        return self.norm(x)
+    
