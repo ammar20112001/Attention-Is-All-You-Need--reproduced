@@ -278,3 +278,39 @@ class ProjectionLayer(nn.Module):
             x --> (B, S, V)
         '''
         return self.proj(x)
+    
+class Transformer(nn.Module):
+
+    def __init__(self,
+                 d_model: int,
+                 src_vocab_size: int,
+                 tgt_vocab_sizze: int,
+                 embedding_layer: Embeddings,
+                 pes_layer: PositionalEncodings,
+                 encoder: Encoder,
+                 decoder: Decoder,
+                 projection_layer: ProjectionLayer):
+        super().__init__(self)
+        self.d_model = d_model
+        self.src_vocab_size = src_vocab_size
+        self.tgt_vocab_sizze = tgt_vocab_sizze
+
+        # Copy layer classes
+        self.embedding_layer = embedding_layer
+        self.pes_layer = pes_layer
+        self.encoder = encoder
+        self.decoder = decoder
+        self.projection_layer = projection_layer
+
+    def encode(self, x: torch.Tensor, src_mask: torch.Tensor):
+        x = self.embedding_layer(x)
+        x = self.pes_layer(x)
+        return self.encoder(x, src_mask) # (B, S, d_model)
+    
+    def decode(self, y: torch.Tensor, encoder_output: torch.Tensor, src_mask: torch.Tensor, tgt_mask: torch.Tensor):
+        y = self.embedding_layer(y)
+        y = self.pes_layer(y)
+        return self.decoder(y, encoder_output, src_mask, tgt_mask) # (B, S, d_model)
+    
+    def project(self, x: torch.Tensor):
+        return self.projection_layer(x) # (B, S, V)
