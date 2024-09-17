@@ -61,11 +61,10 @@ class PositionalEncodings(nn.Module):
 
 class MultiHeadAttention(nn.Module):
 
-    def __init__(self, d_model, h, mask, dropout: float) -> None:
+    def __init__(self, d_model, h, dropout: float) -> None:
         super().__init__()
         self.d_model = d_model
         self.h = h
-        self.mask = mask
         self.dropout = dropout
 
         self.dk = d_model // h
@@ -77,7 +76,7 @@ class MultiHeadAttention(nn.Module):
         self.w_v = nn.Linear(d_model, d_model, bias=False)
         self.w_o = nn.Linear(d_model, d_model, bias=False)
 
-    def forward(self, q, k, v):
+    def forward(self, q, k, v, mask):
         '''
         Arguments:
             q --> (B, S, d_model)
@@ -131,9 +130,9 @@ class MultiHeadAttention(nn.Module):
         # --> ((B, h, S, dk) * (B, h, dk, S)) --> (B, h, S, S)
         attention_scores = (query @ key.transpose(-2, -1)) / math.sqrt(self.dk)
 
-        if self.mask is not None:
+        if mask is not None:
             # Write a very low value (indicating -inf) to the positions where mask == 0
-            attention_scores.masked_fill_(self.mask == 0, -1e9)
+            attention_scores.masked_fill_(mask == 0, -1e9)
         
         # Apply softmax --> (B, h, S, S)
         attention_scores = attention_scores.softmax(dim=-1) 
@@ -282,35 +281,101 @@ class ProjectionLayer(nn.Module):
 class Transformer(nn.Module):
 
     def __init__(self,
-                 d_model: int,
-                 src_vocab_size: int,
-                 tgt_vocab_sizze: int,
-                 embedding_layer: Embeddings,
+                 src_embedding_layer: Embeddings,
+                 tgt_embedding_layer: Embeddings,
                  pes_layer: PositionalEncodings,
                  encoder: Encoder,
                  decoder: Decoder,
                  projection_layer: ProjectionLayer):
         super().__init__(self)
-        self.d_model = d_model
-        self.src_vocab_size = src_vocab_size
-        self.tgt_vocab_sizze = tgt_vocab_sizze
-
         # Copy layer classes
-        self.embedding_layer = embedding_layer
+        self.src_embedding_layer = src_embedding_layer
+        self.tgt_embedding_layer = tgt_embedding_layer
         self.pes_layer = pes_layer
         self.encoder = encoder
         self.decoder = decoder
         self.projection_layer = projection_layer
 
     def encode(self, x: torch.Tensor, src_mask: torch.Tensor):
-        x = self.embedding_layer(x)
+        x = self.src_embedding_layer(x)
         x = self.pes_layer(x)
         return self.encoder(x, src_mask) # (B, S, d_model)
     
     def decode(self, y: torch.Tensor, encoder_output: torch.Tensor, src_mask: torch.Tensor, tgt_mask: torch.Tensor):
-        y = self.embedding_layer(y)
+        y = self.tgt_embedding_layer(y)
         y = self.pes_layer(y)
         return self.decoder(y, encoder_output, src_mask, tgt_mask) # (B, S, d_model)
     
     def project(self, x: torch.Tensor):
         return self.projection_layer(x) # (B, S, V)
+    
+def build_transformer(
+        embedding_layer: Embeddings = Embeddings,
+        pes_layer: PositionalEncodings = PositionalEncodings,
+        multi_head_attention_block: MultiHeadAttention = MultiHeadAttention,
+        feed_forward_block: FeedForward = FeedForward,
+        encoder_block: EncoderBlock = EncoderBlock,
+        decoder_block: DecoderBlock = DecoderBlock,
+        encoder: Encoder = Encoder,
+        decoder: Decoder = Decoder,
+        transformer: Transformer = Transformer,
+
+        d_model: int = 512,
+        heads: int = 8,
+        n_stack: int = 6,
+        max_seq_len: int = 512,
+        src_vocab_size: int = 10_000,
+        tgt_vocab_size: int = 10_000,
+        dropout: float = 0.1,
+        d_fc: int = 2048
+        ):
+    
+    # Create Embedding layer instances
+    src_embedding_layer = embedding_layer(d_model, src_vocab_size)
+    tgt_embedding_layer = embedding_layer(d_model, tgt_vocab_size)
+
+    # Create Positional Encoding layer instance
+    pes_layer = pes_layer(d_model, max_seq_len, dropout)
+
+    encoder_blocks = [] # n-stack of Encoder blocks
+    decoder_blocks = [] # n-stack of Decoder blocks
+
+    for _ in range(n_stack):
+        multi_head_attention_block = multi_head_attention_block(d_model, heads, dropout)
+        feed_forward_block = FeedForward(d_model, d_fc, dropout)
+        encoder_blocks.append(
+            encoder_block(d_model, multi_head_attention_block, feed_forward_block, dropout)
+            )
+
+    for _ in range(n_stack):
+        multi_head_attention_block = multi_head_attention_block(d_model, heads, dropout)
+        cross_attention_block = multi_head_attention_block(d_model, heads, dropout)
+        feed_forward_block = FeedForward(d_model, d_fc, dropout)
+        decoder_blocks.append(
+            decoder_block(d_model, multi_head_attention_block, cross_attention_block, feed_forward_block, dropout)
+            )
+        
+
+    # Create complete Encoder and Decoder layer instances
+    encoder = encoder(d_model, nn.ModuleList(encoder_blocks))
+    decoder = decoder(d_model, nn.ModuleList(decoder_blocks))
+
+    # Create Projection layer instance
+    projection_layer = projection_layer(d_model, tgt_vocab_size)
+
+    # Create Transformer instance
+    transformer = transformer(
+        src_embedding_layer,
+        tgt_embedding_layer,
+        pes_layer,
+        encoder,
+        decoder,
+        projection_layer
+        )
+    
+    # Initialize the parameters
+    for p in transformer.parameters():
+        if p.dim() > 1:
+            nn.init.xavier_uniform_(p)
+
+    return transformer
