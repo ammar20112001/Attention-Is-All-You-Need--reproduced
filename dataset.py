@@ -24,9 +24,9 @@ class BilingualDataset(Dataset):
         tokenizer = config['tokenizer']
 
         # Initializing special tokens
-        self.sos_token = None
-        self.eos_token = None
-        self.tgt_token = None
+        self.sos_token = '<sos>'
+        self.eos_token = '<eos>'
+        self.pad_token = '<pad>'
 
     def __len__(self):
         return len(self.ds)
@@ -76,22 +76,54 @@ class BilingualDataset(Dataset):
         elif dec_num_pad_tokens < 0:
             raise ValueError(f"Sentence is too long. Expected {self.dec_max_seq_len}, received {len(ds_tgt_tokens)}")
         
-        encoder_input = torch.cat[
+        encoder_input = torch.cat([
             self.sos_token,
             torch.tensor(ds_src_tokens, dtype=torch.int64),
             self.eos_token,
-            torch.tensor([self.pad_tokens] * enc_num_pad_tokens, dtype=torch.int64)
-        ] # <sos> ...sentence tokens... <eos> <pad>...
+            torch.tensor([self.pad_token] * enc_num_pad_tokens, dtype=torch.int64)
+            # <sos> ...sentence tokens... <eos> <pad>...
+        ], dim=0)
 
-        return self.ds[idx], ds_src_tokens, ds_tgt_tokens
+        decoder_input = torch.cat([
+            self.sos_token,
+            torch.tensor(ds_tgt_tokens, dtype=torch.int64),
+            torch.tensor([self.pad_token] * enc_num_pad_tokens, dtype=torch.int64)
+            # <sos> ...sentence tokens... <pad>...
+        ], dim=0)
+
+        labels = torch.cat([
+            torch.tensor(ds_tgt_tokens, dtype=torch.int64),
+            self.eos_token,
+            torch.tensor([self.pad_token] * enc_num_pad_tokens, dtype=torch.int64)
+            # <sos> ...sentence tokens... <pad>...
+        ], dim=0)
+
+        encoder_mask = (encoder_input != self.pad_token).unsqueeze(0).unsqueeze(0).int() # (1, 1, seq_len)
+        decoder_mask = (decoder_input != self.pad_token).unsqueeze(0).int() & BilingualDataset.causal_mask(decoder_input.size(0)) # (1, seq_len) & (1, seq_len, seq_len)
+
+        return {
+            'encoder_input': encoder_input,
+            'dencoder_input': decoder_input,
+            'labels': labels,
+            'encoder_mask': encoder_mask,
+            'decoder_mask': decoder_mask
+        }
+
+        #return self.ds[idx], ds_src_tokens, ds_tgt_tokens
     
     @staticmethod
     def tokenize_text(sentence):
-        return sentence
+        return [0,1,2]
     
     @staticmethod
     def get_tokenizer():
         pass
+
+    @staticmethod
+    def causal_mask(size):
+        mask = torch.triu(torch.ones((1, size, size)), diagonal=1).type(torch.int)
+        return mask == 0
+
 
 
 def get_ds(config):
