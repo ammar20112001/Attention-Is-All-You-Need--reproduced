@@ -40,7 +40,7 @@ class PositionalEncodings(nn.Module):
         pe = [[math.sin(p/(10_000**((2*i)/self.d_model))) if i % 2 == 0 else math.cos(p/(10_000**((2*i)/self.d_model))) for i in range(self.d_model)] for p in range (self.seq_len)]
         
         # Convert pe list to Torch Tensor
-        pes = torch.FloatTensor(pes)
+        pe = torch.FloatTensor(pe)
         # Add a batch dimension to the positional encoding
         # pe --> (1, S, d_model)
         pe = pe.unsqueeze(0)
@@ -168,7 +168,7 @@ class FeedForward(nn.Module):
 class LayerNormalization(nn.Module):
     
     def __init__(self, d_model: int, eps: float = 1e-6) -> None:
-        super().__init__(self)
+        super().__init__()
         self.eps = eps
         self.alpha = nn.Parameter(torch.ones(d_model)) # Learnable parameter
         self.beta = nn.Parameter(torch.zeros(d_model)) # Learnable parameter
@@ -189,9 +189,9 @@ class LayerNormalization(nn.Module):
 class ResidualConnection(nn.Module):
 
     def __init__(self, d_model: int, dropout: float):
-        super().__init__(self)
+        super().__init__()
         self.norm = LayerNormalization(d_model)
-        self.dropout(dropout)
+        self.dropout = dropout
 
     def forward(self, x, sublayer):
         x = x + self.dropout((sublayer(self.norm(x))))
@@ -204,7 +204,7 @@ class EncoderBlock(nn.Module):
                  feed_forward_block: FeedForward,
                  dropout: float
                  ):
-        super().__init__(self)
+        super().__init__()
         self.multi_head_attention_block = multi_head_attention_block
         self.feed_forward_block = feed_forward_block
         self.dropout = dropout
@@ -224,7 +224,7 @@ class DecoderBlock(nn.Module):
                  feed_forward_block: FeedForward,
                  dropout: float
                  ):
-        super().__init__(self)
+        super().__init__()
         self.multi_head_attention_block = multi_head_attention_block
         self.cross_attention_block = cross_attention_block
         self.feed_forward_block = feed_forward_block
@@ -240,7 +240,7 @@ class DecoderBlock(nn.Module):
 class Encoder(nn.Module):
 
     def __init__(self, d_model, layers: nn.ModuleList) -> None:
-        super().__init__(self)
+        super().__init__()
         self.layers = layers
         self.norm = LayerNormalization(d_model)
     
@@ -252,7 +252,7 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
 
     def __init__(self, d_model, layers: nn.ModuleList) -> None:
-        super().__init__(self)
+        super().__init__()
         self.layers = layers
         self.norm = LayerNormalization(d_model)
     
@@ -287,7 +287,7 @@ class Transformer(nn.Module):
                  encoder: Encoder,
                  decoder: Decoder,
                  projection_layer: ProjectionLayer):
-        super().__init__(self)
+        super().__init__()
         # Copy layer classes
         self.src_embedding_layer = src_embedding_layer
         self.tgt_embedding_layer = tgt_embedding_layer
@@ -310,16 +310,6 @@ class Transformer(nn.Module):
         return self.projection_layer(x) # (B, S, V)
     
 def build_transformer(
-        embedding_layer: Embeddings = Embeddings,
-        pes_layer: PositionalEncodings = PositionalEncodings,
-        multi_head_attention_block: MultiHeadAttention = MultiHeadAttention,
-        feed_forward_block: FeedForward = FeedForward,
-        encoder_block: EncoderBlock = EncoderBlock,
-        decoder_block: DecoderBlock = DecoderBlock,
-        encoder: Encoder = Encoder,
-        decoder: Decoder = Decoder,
-        transformer: Transformer = Transformer,
-
         d_model: int = 512,
         heads: int = 8,
         n_stack: int = 6,
@@ -331,40 +321,40 @@ def build_transformer(
         ):
     
     # Create Embedding layer instances
-    src_embedding_layer = embedding_layer(d_model, src_vocab_size)
-    tgt_embedding_layer = embedding_layer(d_model, tgt_vocab_size)
+    src_embedding_layer = Embeddings(d_model, src_vocab_size)
+    tgt_embedding_layer = Embeddings(d_model, tgt_vocab_size)
 
     # Create Positional Encoding layer instance
-    pes_layer = pes_layer(d_model, max_seq_len, dropout)
+    pes_layer = PositionalEncodings(d_model, max_seq_len, dropout)
 
     encoder_blocks = [] # n-stack of Encoder blocks
     decoder_blocks = [] # n-stack of Decoder blocks
 
     for _ in range(n_stack):
-        multi_head_attention_block = multi_head_attention_block(d_model, heads, dropout)
+        multi_head_attention_block = MultiHeadAttention(d_model, heads, dropout)
         feed_forward_block = FeedForward(d_model, d_fc, dropout)
         encoder_blocks.append(
-            encoder_block(d_model, multi_head_attention_block, feed_forward_block, dropout)
+            EncoderBlock(d_model, multi_head_attention_block, feed_forward_block, dropout)
             )
 
     for _ in range(n_stack):
-        multi_head_attention_block = multi_head_attention_block(d_model, heads, dropout)
-        cross_attention_block = multi_head_attention_block(d_model, heads, dropout)
+        multi_head_attention_block = MultiHeadAttention(d_model, heads, dropout)
+        cross_attention_block = MultiHeadAttention(d_model, heads, dropout)
         feed_forward_block = FeedForward(d_model, d_fc, dropout)
         decoder_blocks.append(
-            decoder_block(d_model, multi_head_attention_block, cross_attention_block, feed_forward_block, dropout)
+            DecoderBlock(d_model, multi_head_attention_block, cross_attention_block, feed_forward_block, dropout)
             )
         
 
     # Create complete Encoder and Decoder layer instances
-    encoder = encoder(d_model, nn.ModuleList(encoder_blocks))
-    decoder = decoder(d_model, nn.ModuleList(decoder_blocks))
+    encoder = Encoder(d_model, nn.ModuleList(encoder_blocks))
+    decoder = Decoder(d_model, nn.ModuleList(decoder_blocks))
 
     # Create Projection layer instance
-    projection_layer = projection_layer(d_model, tgt_vocab_size)
+    projection_layer = ProjectionLayer(d_model, tgt_vocab_size)
 
     # Create Transformer instance
-    transformer = transformer(
+    transformer = Transformer(
         src_embedding_layer,
         tgt_embedding_layer,
         pes_layer,
@@ -379,3 +369,9 @@ def build_transformer(
             nn.init.xavier_uniform_(p)
 
     return transformer
+
+if __name__ == '__main__':
+    transformer = build_transformer()
+    print(transformer, 
+          f'Number of parameters: {sum(p.numel() for p in transformer.parameters() if p.requires_grad)}', 
+          sep='\n\n')
