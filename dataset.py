@@ -128,8 +128,7 @@ class BilingualDataset(Dataset):
     
     @staticmethod
     def tokenize_text(sentence):
-        #x = (([0, 1, 2], [0, 1, 2]), [0, 1, 2], [0, 1, 2])
-        return tokenizer(sentence['text'], add_special_tokens=False)#, tokenizer(sentence['text'][0].split(' ###>')[0])
+        return tokenizer(sentence['text'], add_special_tokens=False)
 
     @staticmethod
     def causal_mask(size):
