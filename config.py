@@ -9,4 +9,14 @@ def config():
         
         'enc_max_seq_len': 512,
         'dec_max_seq_len': 512,
+
+        # Transformer model architecture details
+        'd_model': 512,
+        'heads': 8,
+        'n_stack': 6,
+        'max_seq_len': 512,
+        'src_vocab_size': 10_000,
+        'tgt_vocab_size': 10_000,
+        'dropout': 0.1,
+        'd_fc': 2048
     }
