@@ -113,7 +113,7 @@ class BilingualDataset(Dataset):
 
             return {
                 'encoder_input': encoder_input,
-                'dencoder_input': decoder_input,
+                'decoder_input': decoder_input,
                 'labels': labels,
                 'encoder_mask': encoder_mask,
                 'decoder_mask': decoder_mask
@@ -129,7 +129,7 @@ class BilingualDataset(Dataset):
     @staticmethod
     def tokenize_text(sentence):
         #x = (([0, 1, 2], [0, 1, 2]), [0, 1, 2], [0, 1, 2])
-        return tokenizer(sentence['text'])#, tokenizer(sentence['text'][0].split(' ###>')[0])
+        return tokenizer(sentence['text'], add_special_tokens=False)#, tokenizer(sentence['text'][0].split(' ###>')[0])
 
     @staticmethod
     def causal_mask(size):
@@ -149,3 +149,6 @@ if __name__ == '__main__':
     x = ds.__getitem__(random.randrange(0, ds.__len__()))
     for key, value in x.items():
         print(key, value)
+
+    print('\n')
+    print(tokenizer.decode(x['encoder_input']), tokenizer.decode(x['decoder_input'], sep='\n'))
