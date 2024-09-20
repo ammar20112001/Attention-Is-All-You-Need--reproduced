@@ -5,6 +5,9 @@ def config():
         "lang_tgt": "it",
         "datasource": 'opus_books',
 
+        'train_frac': 0.9,
+        'test_val_frac': 0.5,
+
         'tokenizer': 'bert-base-uncased',
         
         'enc_max_seq_len': 512,
