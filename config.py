@@ -8,6 +8,8 @@ def config():
         'train_frac': 0.9,
         'test_val_frac': 0.5,
 
+        'batch_size': 32,
+
         'tokenizer': 'bert-base-uncased',
         
         'enc_max_seq_len': 512,
