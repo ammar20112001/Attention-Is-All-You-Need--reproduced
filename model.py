@@ -1,8 +1,8 @@
 # The code is referred from the Github Repo:
 # https://github.com/hkproj/pytorch-transformer/blob/main/model.py
 
-import torch # type: ignore
-import torch.nn as nn # type: ignore
+import torch
+import torch.nn as nn
 import math
 
 class Embeddings(nn.Module):

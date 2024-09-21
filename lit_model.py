@@ -1,22 +1,25 @@
 from model import build_transformer
+from config import configuration
 
 import torch
 import lightning as L
 
+config = configuration()
+
 class transformerLightning(L.LightningModule):
     
-    def __init__(self, config):
+    def __init__(self):
         super().__init__()
         # Initialize transformer model
         self.transformer = build_transformer(
-            d_model = config['d_model'],
+            '''d_model = config['d_model'],
             heads = config['heads'],
             n_stack = config['n_stack'],
             max_seq_len = config['max_seq_len'],
             src_vocab_size = config['src_vocab_size'],
             tgt_vocab_size = config['tgt_vocab_size'],
             dropout = config['dropout'],
-            d_fc = config['d_fc']
+            d_fc = config['d_fc']'''
         )
 
     def training_step(self, batch, batch_idx):
