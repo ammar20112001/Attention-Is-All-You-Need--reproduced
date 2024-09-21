@@ -1,5 +1,5 @@
 import random
-from config import config
+from config import configuration
 
 import random
 
@@ -11,7 +11,8 @@ from transformers import AutoTokenizer
 from datasets import load_dataset
 
 
-config = config()
+config = configuration()
+print('\n\n',config['dataset'],'\n\n')
 tokenizer = AutoTokenizer.from_pretrained(config['tokenizer'])
 special_tokens_dict = {'bos_token': '<sos>', 'eos_token': '<eos>', 'unk_token': '<unk>', 'pad_token': '<pad>'}
 tokenizer.add_special_tokens(special_tokens_dict)
@@ -136,10 +137,11 @@ class BilingualDataset(Dataset):
         return mask == 0
 
     @staticmethod
-    def get_ds(config, tokenize=True):
-        ds = load_dataset(config['dataset'])
+    def get_ds(config, tokenize=True):        
+        #ds = load_dataset(config['dataset'])
+        ds = load_dataset("kaitchup/opus-English-to-French")
         if tokenize == True:
-            ds = ds.map(BilingualDataset.tokenize_text, batched=True)      
+            ds = ds.map(BilingualDataset.tokenize_text, batched=True)
         return ds
 
 

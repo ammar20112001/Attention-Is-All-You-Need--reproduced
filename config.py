@@ -1,6 +1,6 @@
-def config():
+def configuration():
     return {
-        'dataset': 'kaitchup/opus-English-to-French',
+        "dataset": "kaitchup/opus-English-to-French",
         "lang_src": "en",
         "lang_tgt": "it",
         "datasource": 'opus_books',
