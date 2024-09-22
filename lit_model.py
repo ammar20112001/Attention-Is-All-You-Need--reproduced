@@ -23,12 +23,13 @@ class transformerLightning(L.LightningModule):
         )
 
     def training_step(self, batch, batch_idx):
-        print('\n\n', batch, '\n\n')
-        encoder_input = batch['encoder_input']
-        decoder_input = batch['decoder_input']
-        labels = batch['labels']
-        encoder_mask = batch['encoder_mask']
-        decoder_mask = batch['decoder_mask']
+        batch_out = self.__getitem__(batch_idx)
+        print(batch_out)
+        encoder_input = batch_out['encoder_input']
+        decoder_input = batch_out['decoder_input']
+        labels = batch_out['labels']
+        encoder_mask = batch_out['encoder_mask']
+        decoder_mask = batch_out['decoder_mask']
 
         # Encoding source text
         encoder_output = self.transformer.encode(encoder_input, encoder_mask) # --> (B, S, d_model)

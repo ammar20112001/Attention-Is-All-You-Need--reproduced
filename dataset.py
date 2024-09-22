@@ -65,6 +65,7 @@ class BilingualDataset(Dataset):
                 target_sentence
             }
         '''
+        print('\n\n\n\n\n', '__GET_ITEM__', '\n\n\n\n\n\n\n\n')
 
         # Parse source and target sentences
         sentence = self.ds['train'][idx]['input_ids']
@@ -84,42 +85,40 @@ class BilingualDataset(Dataset):
         elif dec_num_pad_tokens < 0:
             raise ValueError(f"Sentence is too long. Expected {self.dec_max_seq_len}, received {len(ds_tgt_tokens)}")
         
-        passs = True
-        if passs:
-            encoder_input = torch.cat([
-                self.sos_token,
-                torch.tensor(ds_src_tokens, dtype=torch.int64),
-                self.eos_token,
-                torch.tensor([self.pad_token] * enc_num_pad_tokens, dtype=torch.int64)
-                # <sos> ...sentence tokens... <eos> <pad>...
-            ], dim=0)
+        encoder_input = torch.cat([
+            self.sos_token,
+            torch.tensor(ds_src_tokens, dtype=torch.int64),
+            self.eos_token,
+            torch.tensor([self.pad_token] * enc_num_pad_tokens, dtype=torch.int64)
+            # <sos> ...sentence tokens... <eos> <pad>...
+        ], dim=0)
 
-            decoder_input = torch.cat([
-                self.sos_token,
-                torch.tensor(ds_tgt_tokens, dtype=torch.int64),
-                torch.tensor([self.pad_token] * dec_num_pad_tokens, dtype=torch.int64)
-                # <sos> ...sentence tokens... <pad>...
-            ], dim=0)
+        decoder_input = torch.cat([
+            self.sos_token,
+            torch.tensor(ds_tgt_tokens, dtype=torch.int64),
+            torch.tensor([self.pad_token] * dec_num_pad_tokens, dtype=torch.int64)
+            # <sos> ...sentence tokens... <pad>...
+        ], dim=0)
 
-            labels = torch.cat([
-                torch.tensor(ds_tgt_tokens, dtype=torch.int64),
-                self.eos_token,
-                torch.tensor([self.pad_token] * dec_num_pad_tokens, dtype=torch.int64)
-                # <sos> ...sentence tokens... <pad>...
-            ], dim=0)
+        labels = torch.cat([
+            torch.tensor(ds_tgt_tokens, dtype=torch.int64),
+            self.eos_token,
+            torch.tensor([self.pad_token] * dec_num_pad_tokens, dtype=torch.int64)
+            # <sos> ...sentence tokens... <pad>...
+        ], dim=0)
 
-            encoder_mask = (encoder_input != self.pad_token).unsqueeze(0).unsqueeze(0).int() # (1, 1, seq_len)
-            decoder_mask = (decoder_input != self.pad_token).unsqueeze(0).int() & BilingualDataset.causal_mask(decoder_input.size(0)) # (1, seq_len) & (1, seq_len, seq_len)
+        encoder_mask = (encoder_input != self.pad_token).unsqueeze(0).unsqueeze(0).int() # (1, 1, seq_len)
+        decoder_mask = (decoder_input != self.pad_token).unsqueeze(0).int() & BilingualDataset.causal_mask(decoder_input.size(0)) # (1, seq_len) & (1, seq_len, seq_len)
 
-            return {
-                'encoder_input': encoder_input,
-                'decoder_input': decoder_input,
-                'labels': labels,
-                'encoder_mask': encoder_mask,
-                'decoder_mask': decoder_mask
-            }
+        return {
+            'encoder_input': encoder_input,
+            'decoder_input': decoder_input,
+            'labels': labels,
+            'encoder_mask': encoder_mask,
+            'decoder_mask': decoder_mask
+        }
 
-        return ds_src_tokens, ds_tgt_tokens
+        #return ds_src_tokens, ds_tgt_tokens
     
 
     @staticmethod

@@ -28,9 +28,12 @@ class DataModuleLightning(LightningDataModule):
         self.test_val_frac = config['test_val_frac']
 
         # Create train/val/test indices
-        self.train_indices = [i for i in range(1, math.floor(len(self.dataset.ds['train']['input_ids']) * self.train_frac))]
-        self.val_indices = [i for i in range(self.train_indices[-1], math.floor((self.train_frac + ((1 - self.train_frac) * self.test_val_frac)) * len(self.dataset.ds['train']['input_ids'])))]
-        self.test_indices = [i for i in range(self.val_indices[-1], len(self.dataset.ds['train']['input_ids']))]
+        self.train_indices = [i for i in range(1, math.floor(len(self.dataset.ds['train']) * self.train_frac))]
+        self.val_indices = [i for i in range(self.train_indices[-1], math.floor((self.train_frac + ((1 - self.train_frac) * self.test_val_frac)) * len(self.dataset.ds['train'])))]
+        self.test_indices = [i for i in range(self.val_indices[-1], len(self.dataset.ds['train']))]
+
+        print('\n\nTRAIN/VAL/TEST SETS:')
+        print(len(self.train_indices), len(self.val_indices), len(self.test_indices), sep='\n')
 
     def prepare_data(self):
         pass
@@ -41,11 +44,11 @@ class DataModuleLightning(LightningDataModule):
         for training, validation, and testing
         '''
         if stage == 'fit' or stage is None:
-            self.train_set = Subset(self.dataset.ds['train']['input_ids'], self.train_indices)
-            self.val_set = Subset(self.dataset.ds['train']['input_ids'], self.val_indices)
+            self.train_set = Subset(self.dataset.ds['train'], self.train_indices)
+            self.val_set = Subset(self.dataset.ds['train'], self.val_indices)
         
         elif stage == 'test':
-            self.test_set = Subset(self.dataset.ds['train']['input_ids'], self.test_indices)
+            self.test_set = Subset(self.dataset.ds['train'], self.test_indices)
 
     def train_dataloader(self):
         dl = DataLoader(self.train_set, batch_size=config['batch_size'], collate_fn=lambda x: x)
