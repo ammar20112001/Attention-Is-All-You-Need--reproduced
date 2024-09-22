@@ -25,7 +25,7 @@ class Embeddings(nn.Module):
         Return:
             e -->   (B, S, d_model)       d_model: Model's Dimension
         '''
-        return self.embedding(x) * math.sqrt(self.d_model)
+        return self.embeddings(x) * math.sqrt(self.d_model)
 
 class PositionalEncodings(nn.Module):
     
@@ -120,9 +120,9 @@ class MultiHeadAttention(nn.Module):
         # Query, key, and value are divided into `h` number of HEADS
         # q/k --> (B, S, d_model) --> (B, S, h, dk) --> (B, h, S, dk)
         # v --> (B, S, d_model) --> (B, S, h, dv) --> (B, h, S, dv)
-        query = query.view(query[0], query[1], self.h, self.dk).transpose(1, 2)
-        key = key.view(key[0], key[1], self.h, self.dk).transpose(1, 2)
-        value = value.view(value[0], value[1], self.h, self.dv).transpose(1, 2)
+        query = query.view(query.shape[0], query.shape[1], self.h, self.dk).transpose(1, 2)
+        key = key.view(key.shape[0], key.shape[1], self.h, self.dk).transpose(1, 2)
+        value = value.view(value.shape[0], value.shape[1], self.h, self.dv).transpose(1, 2)
 
         # Attention scores are calculated
         # HEAD(s) --> softmax( (q * k.T) / sqrt(dk)) * v 
@@ -184,7 +184,7 @@ class LayerNormalization(nn.Module):
 
         # Return normalized values
         # (B, S, d_model)
-        return self.alpha((x - mean) / (math.sqrt(std**2 + self.eps))) + self.beta
+        return self.alpha * (x - mean) / (std + self.eps) + self.beta
     
 class ResidualConnection(nn.Module):
 
@@ -314,8 +314,8 @@ def build_transformer(
         heads: int = 8,
         n_stack: int = 6,
         max_seq_len: int = 512,
-        src_vocab_size: int = 10_000,
-        tgt_vocab_size: int = 10_000,
+        src_vocab_size: int = 40_000,
+        tgt_vocab_size: int = 40_000,
         dropout: float = 0.1,
         d_fc: int = 2048
         ):

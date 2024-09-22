@@ -18,20 +18,23 @@ config = configuration()
 
 class DataModuleLightning(LightningDataModule):
 
-    def __init__(self, config, data_dir='./Data'):
+    def __init__(self, data_dir='./Data'):
         super().__init__()
         self.data_dir = data_dir
-        self.dataset = BilingualDataset(config)
-        print(len(self.dataset))
+        self.dataset = BilingualDataset()
 
         # Declare train/val/test data fractions
         self.train_frac = config['train_frac']
         self.test_val_frac = config['test_val_frac']
 
         # Create train/val/test indices
-        self.train_indices = [i for i in range(1, math.floor(len(self.dataset) * self.train_frac))]
-        self.val_indices = [i for i in range(self.train_indices[-1], math.floor((self.train_frac + ((1 - self.train_frac) * self.test_val_frac)) * len(self.dataset)))]
-        self.test_indices = [i for i in range(self.val_indices[-1], len(self.dataset))]
+        self.train_indices = [i for i in range(1, math.floor(len(self.dataset.ds['train']) * self.train_frac))]
+        self.val_indices = [i for i in range(self.train_indices[-1], math.floor((self.train_frac + ((1 - self.train_frac) * self.test_val_frac)) * len(self.dataset.ds['train'])))]
+        self.test_indices = [i for i in range(self.val_indices[-1], len(self.dataset.ds['train']))]
+
+        print('\n\nTRAIN/VAL/TEST SETS:')
+        print(len(self.train_indices), len(self.val_indices), len(self.test_indices), sep='\n')
+        print('\n')
 
     def prepare_data(self):
         pass
@@ -42,11 +45,11 @@ class DataModuleLightning(LightningDataModule):
         for training, validation, and testing
         '''
         if stage == 'fit' or stage is None:
-            self.train_set = Subset.Subset(self.dataset, self.train_indices)
-            self.val_set = Subset.Subset(self.dataset, self.val_indices)
+            self.train_set = Subset(self.dataset, self.train_indices)
+            self.val_set = Subset(self.dataset, self.val_indices)
         
         elif stage == 'test':
-            self.test_set = Subset.Subset(self.dataset, self.test_indices)
+            self.test_set = Subset(self.dataset, self.test_indices)
 
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size=config['batch_size'])
@@ -61,8 +64,4 @@ class DataModuleLightning(LightningDataModule):
         pass
 
 if __name__ == '__main__':
-    '''train_indices = [i for i in range(1, math.floor(101 * 0.9))]
-    val_indices = [i for i in range(train_indices[-1], math.floor((0.9 + ((1 - 0.9) * 0.5)) * 101))]
-    test_indices = [i for i in range(val_indices[-1], 101)]
-
-    print(train_indices, val_indices, test_indices, sep='\n')'''
+    pass
