@@ -184,7 +184,7 @@ class LayerNormalization(nn.Module):
 
         # Return normalized values
         # (B, S, d_model)
-        return self.alpha((x - mean) / (math.sqrt(std**2 + self.eps))) + self.beta
+        return self.alpha * (x - mean) / (std + self.eps) + self.beta
     
 class ResidualConnection(nn.Module):
 
