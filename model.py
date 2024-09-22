@@ -65,7 +65,7 @@ class MultiHeadAttention(nn.Module):
         super().__init__()
         self.d_model = d_model
         self.h = h
-        self.dropout = dropout
+        self.dropout = nn.Dropout(dropout)
 
         self.dk = d_model // h
         self.dv = d_model // h
@@ -146,7 +146,7 @@ class MultiHeadAttention(nn.Module):
         # All HEADs are concatenated
         # Concat(HEAD_1, ..., HEAD_h)
         # (B, h, S, dv) --> (B, S, h, dv) --> (batch, S, d_model)
-        x = attention_scores.transpose(1, 2).contiguous().view(attention_scores[0], -1, self.h*self.dv)
+        x = attention.transpose(1, 2).contiguous().view(attention.shape[0], -1, self.h*self.dv)
 
         # Multiply by w_o
         # (B, S, d_model) * (d_model, d_model) --> (B, S, d_model)
@@ -159,7 +159,7 @@ class FeedForward(nn.Module):
         # Initialize linear layers
         self.fc1 = nn.Linear(d_model, d_fc)
         self.fc2 = nn.Linear(d_fc, d_model)
-        self.dropout = dropout
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
         # (B, S, d_model) --> (B, S, d_ff) --> (B, S, d_model)
@@ -191,10 +191,10 @@ class ResidualConnection(nn.Module):
     def __init__(self, d_model: int, dropout: float):
         super().__init__()
         self.norm = LayerNormalization(d_model)
-        self.dropout = dropout
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, sublayer):
-        x = x + self.dropout((sublayer(self.norm(x))))
+        return x + self.dropout(sublayer(self.norm(x)))
 
 class EncoderBlock(nn.Module):
 
@@ -371,7 +371,4 @@ def build_transformer(
     return transformer
 
 if __name__ == '__main__':
-    transformer = build_transformer()
-    print(transformer, 
-          f'Number of parameters: {sum(p.numel() for p in transformer.parameters() if p.requires_grad)}', 
-          sep='\n\n')
+    pass
