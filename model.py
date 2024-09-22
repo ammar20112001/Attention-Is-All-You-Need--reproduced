@@ -371,7 +371,4 @@ def build_transformer(
     return transformer
 
 if __name__ == '__main__':
-    transformer = build_transformer()
-    print(transformer, 
-          f'Number of parameters: {sum(p.numel() for p in transformer.parameters() if p.requires_grad)}', 
-          sep='\n\n')
+    pass
