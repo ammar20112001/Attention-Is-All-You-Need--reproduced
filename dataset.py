@@ -65,8 +65,6 @@ class BilingualDataset(Dataset):
                 target_sentence
             }
         '''
-        print('\n\n\n\n\n', '__GET_ITEM__', '\n\n\n\n\n\n\n\n')
-
         # Parse source and target sentences
         sentence = self.ds['train'][idx]['input_ids']
 

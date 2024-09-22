@@ -34,6 +34,7 @@ class DataModuleLightning(LightningDataModule):
 
         print('\n\nTRAIN/VAL/TEST SETS:')
         print(len(self.train_indices), len(self.val_indices), len(self.test_indices), sep='\n')
+        print('\n')
 
     def prepare_data(self):
         pass
@@ -44,16 +45,14 @@ class DataModuleLightning(LightningDataModule):
         for training, validation, and testing
         '''
         if stage == 'fit' or stage is None:
-            self.train_set = Subset(self.dataset['train'], self.train_indices)
-            self.val_set = Subset(self.dataset['train'], self.val_indices)
+            self.train_set = Subset(self.dataset, self.train_indices)
+            self.val_set = Subset(self.dataset, self.val_indices)
         
         elif stage == 'test':
-            self.test_set = Subset(self.dataset['train'], self.test_indices)
+            self.test_set = Subset(self.dataset, self.test_indices)
 
     def train_dataloader(self):
-        dl = DataLoader(self.train_set, batch_size=config['batch_size'], collate_fn=lambda x: x)
-        print(dl)
-        return dl
+        return DataLoader(self.train_set, batch_size=config['batch_size'], collate_fn=lambda x: x)
 
     def val_dataloader(self):
         return DataLoader(self.val_set, batch_size=config['batch_size'], collate_fn=lambda x: x)

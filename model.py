@@ -25,7 +25,7 @@ class Embeddings(nn.Module):
         Return:
             e -->   (B, S, d_model)       d_model: Model's Dimension
         '''
-        return self.embedding(x) * math.sqrt(self.d_model)
+        return self.embeddings(x) * math.sqrt(self.d_model)
 
 class PositionalEncodings(nn.Module):
     
