@@ -52,13 +52,13 @@ class DataModuleLightning(LightningDataModule):
             self.test_set = Subset(self.dataset, self.test_indices)
 
     def train_dataloader(self):
-        return DataLoader(self.train_set, batch_size=config['batch_size'], collate_fn=lambda x: x)
+        return DataLoader(self.train_set, batch_size=config['batch_size'])
 
     def val_dataloader(self):
-        return DataLoader(self.val_set, batch_size=config['batch_size'], collate_fn=lambda x: x)
+        return DataLoader(self.val_set, batch_size=config['batch_size'])
         
     def test_dataloader(self):
-        return DataLoader(self.test_set, batch_size=config['batch_size'], collate_fn=lambda x: x)
+        return DataLoader(self.test_set, batch_size=config['batch_size'])
 
     def predict_dataloader(self):
         pass

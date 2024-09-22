@@ -23,13 +23,18 @@ class transformerLightning(L.LightningModule):
         )
 
     def training_step(self, batch, batch_idx):
-        #print(batch[batch_idx])
-        print('\n\n',f'BATCH_IDX: {batch_idx}','\n')
-        encoder_input = batch[batch_idx]['encoder_input']
-        decoder_input = batch[batch_idx]['decoder_input']
-        labels = batch[batch_idx]['labels']
-        encoder_mask = batch[batch_idx]['encoder_mask']
-        decoder_mask = batch[batch_idx]['decoder_mask']
+        print(f'encoder_input: {batch['encoder_input'].shape}')
+        print(f'decoder_input: {batch['decoder_input'].shape}')
+        print(f'labels: {batch['labels'].shape}')
+        print(f'encoder_mask: {batch['encoder_mask'].shape}')
+        print(f'decoder_mask: {batch['decoder_mask'].shape}')
+
+        # Extracting required inputs
+        encoder_input = batch['encoder_input']
+        decoder_input = batch['decoder_input']
+        labels = batch['labels']
+        encoder_mask = batch['encoder_mask']
+        decoder_mask = batch['decoder_mask']
 
         # Encoding source text
         encoder_output = self.transformer.encode(encoder_input, encoder_mask) # --> (B, S, d_model)
@@ -37,7 +42,7 @@ class transformerLightning(L.LightningModule):
         # Decoding to target text
         decoder_output = self.transformer.encode(decoder_input, encoder_output, encoder_mask, decoder_mask) # --> (B, S, d_model)
 
-        # Projecting from (B, S, d_model) to (B, S, Vy_hat
+        # Projecting from (B, S, d_model) to (B, S, V)
         logits = self.transformer.project(decoder_output)
 
         # Calculating Loss
