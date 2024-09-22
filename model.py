@@ -1,9 +1,13 @@
 # The code is referred from the Github Repo:
 # https://github.com/hkproj/pytorch-transformer/blob/main/model.py
 
+from config import configuration
+
 import torch
 import torch.nn as nn
 import math
+
+config = configuration()
 
 class Embeddings(nn.Module):
     '''
@@ -310,14 +314,14 @@ class Transformer(nn.Module):
         return self.projection_layer(x) # (B, S, V)
     
 def build_transformer(
-        d_model: int = 512,
-        heads: int = 8,
-        n_stack: int = 6,
-        max_seq_len: int = 512,
-        src_vocab_size: int = 40_000,
-        tgt_vocab_size: int = 40_000,
-        dropout: float = 0.1,
-        d_fc: int = 2048
+        d_model: int = config['d_model'],
+        heads: int = config['heads'],
+        n_stack: int = config['n_stack'],
+        max_seq_len: int = config['max_seq_len'],
+        src_vocab_size: int = config['src_vocab_size'],
+        tgt_vocab_size: int = config['tgt_vocab_size'],
+        dropout: float = config['dropout'],
+        d_fc: int = config['d_fc']
         ):
     
     # Create Embedding layer instances
