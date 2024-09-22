@@ -159,7 +159,7 @@ class FeedForward(nn.Module):
         # Initialize linear layers
         self.fc1 = nn.Linear(d_model, d_fc)
         self.fc2 = nn.Linear(d_fc, d_model)
-        self.dropout = dropout
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
         # (B, S, d_model) --> (B, S, d_ff) --> (B, S, d_model)
@@ -194,7 +194,6 @@ class ResidualConnection(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, sublayer):
-        print(x.shape)
         return x + self.dropout(sublayer(self.norm(x)))
 
 class EncoderBlock(nn.Module):
