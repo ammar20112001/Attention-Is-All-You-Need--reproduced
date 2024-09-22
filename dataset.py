@@ -13,6 +13,8 @@ from datasets import load_dataset
 
 config = configuration()
 print('\n\n',config['dataset'],'\n\n')
+
+# Initializing tokenizer
 tokenizer = AutoTokenizer.from_pretrained(config['tokenizer'])
 special_tokens_dict = {'bos_token': '<sos>', 'eos_token': '<eos>', 'unk_token': '<unk>', 'pad_token': '<pad>'}
 tokenizer.add_special_tokens(special_tokens_dict)
@@ -20,11 +22,8 @@ tokenizer.add_special_tokens(special_tokens_dict)
 
 class BilingualDataset(Dataset):
     
-    def __init__(self, config) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        # Initializing tokenizer
-        #self.tokenizer = BilingualDataset.get_tokenizer(config)
-
         # Create dataset
         self.ds = BilingualDataset.get_ds(config, tokenize=True)
         self.enc_max_seq_len = config['enc_max_seq_len']
@@ -37,7 +36,7 @@ class BilingualDataset(Dataset):
         self.split_char = tokenizer('###>')['input_ids'][1:-1]
 
     def __len__(self):
-        return len(self.ds)
+        return len(self.ds['train'])
 
     def __getitem__(self, idx):
         '''
@@ -91,7 +90,7 @@ class BilingualDataset(Dataset):
                 self.sos_token,
                 torch.tensor(ds_src_tokens, dtype=torch.int64),
                 self.eos_token,
-                torch.tensor([self.pad_token] * dec_num_pad_tokens, dtype=torch.int64)
+                torch.tensor([self.pad_token] * enc_num_pad_tokens, dtype=torch.int64)
                 # <sos> ...sentence tokens... <eos> <pad>...
             ], dim=0)
 
@@ -138,18 +137,19 @@ class BilingualDataset(Dataset):
 
     @staticmethod
     def get_ds(config, tokenize=True):        
-        #ds = load_dataset(config['dataset'])
-        ds = load_dataset("kaitchup/opus-English-to-French")
+        ds = load_dataset(config['dataset'])
         if tokenize == True:
             ds = ds.map(BilingualDataset.tokenize_text, batched=True)
         return ds
 
 
 if __name__ == '__main__':
-    ds = BilingualDataset(config)
-    x = ds.__getitem__(random.randrange(0, ds.__len__()))
-    for key, value in x.items():
-        print(key, value)
+    ds = BilingualDataset()
 
-    print('\n')
-    print(tokenizer.decode(x['encoder_input']), tokenizer.decode(x['decoder_input'], sep='\n'))
+    for i in range(10):
+        x = ds.__getitem__(random.randrange(0, ds.__len__()))
+        for key, value in x.items():
+            print(key, value.shape)
+
+        print('\n')
+        #print(tokenizer.decode(x['encoder_input']), tokenizer.decode(x['decoder_input'], sep='\n'))
