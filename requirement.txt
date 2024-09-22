@@ -1,0 +1,3 @@
+lightning
+datasets
+jsonargparse[signatures]>=4.27.7
