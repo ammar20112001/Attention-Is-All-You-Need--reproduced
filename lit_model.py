@@ -23,11 +23,13 @@ class transformerLightning(L.LightningModule):
         )
 
     def training_step(self, batch, batch_idx):
+        print('\n')
         print(f'encoder_input: {batch['encoder_input'].shape}')
         print(f'decoder_input: {batch['decoder_input'].shape}')
         print(f'labels: {batch['labels'].shape}')
         print(f'encoder_mask: {batch['encoder_mask'].shape}')
         print(f'decoder_mask: {batch['decoder_mask'].shape}')
+        print('\n')
 
         # Extracting required inputs
         encoder_input = batch['encoder_input']

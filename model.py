@@ -314,8 +314,8 @@ def build_transformer(
         heads: int = 8,
         n_stack: int = 6,
         max_seq_len: int = 512,
-        src_vocab_size: int = 10_000,
-        tgt_vocab_size: int = 10_000,
+        src_vocab_size: int = 40_000,
+        tgt_vocab_size: int = 40_000,
         dropout: float = 0.1,
         d_fc: int = 2048
         ):
