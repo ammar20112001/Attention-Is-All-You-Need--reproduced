@@ -120,9 +120,9 @@ class MultiHeadAttention(nn.Module):
         # Query, key, and value are divided into `h` number of HEADS
         # q/k --> (B, S, d_model) --> (B, S, h, dk) --> (B, h, S, dk)
         # v --> (B, S, d_model) --> (B, S, h, dv) --> (B, h, S, dv)
-        query = query.view(query[0], query[1], self.h, self.dk).transpose(1, 2)
-        key = key.view(key[0], key[1], self.h, self.dk).transpose(1, 2)
-        value = value.view(value[0], value[1], self.h, self.dv).transpose(1, 2)
+        query = query.view(query.shape[0], query.shape[1], self.h, self.dk).transpose(1, 2)
+        key = key.view(key.shape[0], key.shape[1], self.h, self.dk).transpose(1, 2)
+        value = value.view(value.shape[0], value.shape[1], self.h, self.dv).transpose(1, 2)
 
         # Attention scores are calculated
         # HEAD(s) --> softmax( (q * k.T) / sqrt(dk)) * v 
