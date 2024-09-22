@@ -44,11 +44,11 @@ class DataModuleLightning(LightningDataModule):
         for training, validation, and testing
         '''
         if stage == 'fit' or stage is None:
-            self.train_set = Subset(self.dataset.ds['train'], self.train_indices)
-            self.val_set = Subset(self.dataset.ds['train'], self.val_indices)
+            self.train_set = Subset(self.dataset['train'], self.train_indices)
+            self.val_set = Subset(self.dataset['train'], self.val_indices)
         
         elif stage == 'test':
-            self.test_set = Subset(self.dataset.ds['train'], self.test_indices)
+            self.test_set = Subset(self.dataset['train'], self.test_indices)
 
     def train_dataloader(self):
         dl = DataLoader(self.train_set, batch_size=config['batch_size'], collate_fn=lambda x: x)
