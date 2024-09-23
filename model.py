@@ -1,6 +1,3 @@
-# The code is referred from the Github Repo:
-# https://github.com/hkproj/pytorch-transformer/blob/main/model.py
-
 from config import configuration
 
 import torch
