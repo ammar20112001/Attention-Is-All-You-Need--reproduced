@@ -12,16 +12,16 @@ def configuration():
 
         'tokenizer': 'bert-base-uncased',
         
-        'enc_max_seq_len': 512,
-        'dec_max_seq_len': 512,
+        'enc_max_seq_len': 256, # In paper: 512
+        'dec_max_seq_len': 256, # In paper: 512
 
         # Transformer model architecture details
-        'd_model': 512,
-        'heads': 8,
-        'n_stack': 6,
-        'max_seq_len': 512,
+        'd_model': 256, # In paper: 512
+        'heads': 4, # In paper: 8
+        'n_stack': 3, # In paper: 6
+        'max_seq_len': 256, # In paper: 512
         'src_vocab_size': 40_000,
         'tgt_vocab_size': 40_000,
-        'dropout': 0.1,
-        'd_fc': 2048
+        'dropout': 0.1, # In paper: 0.1
+        'd_fc': 1024 # In paper: 2048
     }
