@@ -126,7 +126,7 @@ class BilingualDataset(Dataset):
     
     @staticmethod
     def tokenize_text(sentence):
-        return tokenizer(sentence['text'], add_special_tokens=False)
+        return tokenizer(sentence['text'], add_special_tokens=False, truncation=True, max_length=config['dec_max_seq_len'])
 
     @staticmethod
     def causal_mask(size):
