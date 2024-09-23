@@ -69,11 +69,18 @@ class BilingualDataset(Dataset):
         # Parse source and target sentences
         sentence = self.ds['train'][idx]['input_ids']
 
+        ds_src_tokens = None
+        ds_tgt_tokens = None
+        
         for i in range(len(sentence)):
             if sentence[i] == self.split_char[0]:
                 ds_src_tokens = sentence[:i]
                 ds_tgt_tokens = sentence[i+4:]
                 break
+        
+        if ds_src_tokens == None:
+            ds_src_tokens = sentence[:len(sentence)//2]
+            ds_tgt_tokens = sentence[len(ds_src_tokens):]
 
         # Length of padding tokens in encoder and decoder inputs
         enc_num_pad_tokens = self.enc_max_seq_len - len(ds_src_tokens) - 2 # (-) <sos> and <eos>
