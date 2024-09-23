@@ -1,10 +1,12 @@
 from model import build_transformer
+from dataset import pad_token
 from config import configuration
 
 import torch
 import lightning as L
 
 config = configuration()
+loss_fn = torch.nn.CrossEntropyLoss(ignore_index=pad_token, label_smoothing=0.1)
 
 class transformerLightning(L.LightningModule):
     
@@ -23,20 +25,16 @@ class transformerLightning(L.LightningModule):
         )
 
     def training_step(self, batch, batch_idx):
-        print('\n')
-        print(f"encoder_input: {batch['encoder_input'].shape}")
-        print(f"decoder_input: {batch['decoder_input'].shape}")
-        print(f"labels: {batch['labels'].shape}")
-        print(f"encoder_mask: {batch['encoder_mask'].shape}")
-        print(f"decoder_mask: {batch['decoder_mask'].shape}")
-        print('\n')
-
         # Extracting required inputs
         encoder_input = batch['encoder_input']
         decoder_input = batch['decoder_input']
-        labels = batch['labels']
         encoder_mask = batch['encoder_mask']
         decoder_mask = batch['decoder_mask']
+
+        print(f"\nencoder_input: {encoder_input}")
+        print(f"decoder_input: {decoder_input}")        
+        print(f"encoder_mask: {encoder_mask}")
+        print(f"decoder_mask: {decoder_mask}\n")
 
         # Encoding source text
         encoder_output = self.transformer.encode(encoder_input, encoder_mask) # --> (B, S, d_model)
@@ -45,10 +43,16 @@ class transformerLightning(L.LightningModule):
         decoder_output = self.transformer.decode(decoder_input, encoder_output, encoder_mask, decoder_mask) # --> (B, S, d_model)
 
         # Projecting from (B, S, d_model) to (B, S, V)
-        logits = self.transformer.project(decoder_output)
+        logits = self.transformer.project(decoder_output) # --> (B, S, V)
+
+        # Extracting labels for loss
+        labels = batch['labels'] # --> (B, S)
+
+        print(f"\nLOGITS SHAPE: {logits.transpose(1,2).shape}")
+        print(f"TARGET SHAPE: {labels.shape}\n")
 
         # Calculating Loss
-        loss = torch.nn.functional.nll_loss(logits, labels.view(-1))
+        loss = loss_fn(logits.transpose(1,2), labels)
 
         return loss
 
