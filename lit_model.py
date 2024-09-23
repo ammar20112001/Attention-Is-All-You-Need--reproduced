@@ -30,7 +30,6 @@ class transformerLightning(L.LightningModule):
         decoder_input = batch['decoder_input']
         encoder_mask = batch['encoder_mask']
         decoder_mask = batch['decoder_mask']
-
         '''print(f"\nencoder_input: {encoder_input.shape}")
         print(f"decoder_input: {decoder_input.shape}")
         print(f"encoder_mask: {encoder_mask.shape}")
@@ -47,12 +46,13 @@ class transformerLightning(L.LightningModule):
 
         # Extracting labels for loss
         labels = batch['labels'] # --> (B, S)
-
         '''print(f"\nLOGITS SHAPE: {logits.transpose(1,2).shape}")
         print(f"TARGET SHAPE: {labels.shape}\n")'''
-
         # Calculating Loss
         loss = loss_fn(logits.transpose(1,2), labels)
+
+        # Logging Metrics
+        self.log("LOSS", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         return loss
 
