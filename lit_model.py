@@ -23,6 +23,8 @@ class transformerLightning(L.LightningModule):
             dropout = config['dropout'],
             d_fc = config['d_fc']
         )
+        # Log hyper-parameters
+        self.save_hyperparameters()
 
     def training_step(self, batch, batch_idx):
         # Extracting required inputs
