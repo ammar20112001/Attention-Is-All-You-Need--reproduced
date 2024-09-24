@@ -29,11 +29,11 @@ class transformerLightning(L.LightningModule):
     @staticmethod
     def check_translation(encoder_input, decoder_input, labels):
         output = torch.argmax(labels, dim=-1)
-        for i in range(len(encoder_input)):
+        for i in range(10):
             print(f'Input:          {tokenizer.decode(encoder_input[i], skip_special_tokens=True)}',
                 f'Target:         {tokenizer.decode(decoder_input[i], skip_special_tokens=True)}',
                 '----------------------------------------------------------------------------',
-                f'Model output:   {tokenizer.decode(output[i], skip_special_tokens=True)}',
+                f'Model output:   {tokenizer.decode(output[i], skip_special_tokens=True)}\n',
                 sep='\n')
 
     def training_step(self, batch, batch_idx):
