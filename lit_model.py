@@ -1,3 +1,4 @@
+from numpy import argmax
 from model import build_transformer
 from dataset import tokenizer
 from config import configuration
@@ -28,13 +29,17 @@ class transformerLightning(L.LightningModule):
 
     @staticmethod
     def check_translation(encoder_input, decoder_input, labels):
-        print(f'Input:          {tokenizer.decode(encoder_input, skip_special_tokens=True)}',
-              f'Target:         {tokenizer.decode(decoder_input, skip_special_tokens=True)}',
-              '----------------------------------------------------------------------------',
-              f'Model output:   {tokenizer.decode(labels, skip_special_tokens=True)}',
-              sep='\n')
+        output = torch.argmax(labels, dim=-1)
+        for i in range(len(encoder_input)):
+            print(f'Input:          {tokenizer.decode(encoder_input[i], skip_special_tokens=True)}',
+                f'Target:         {tokenizer.decode(decoder_input[i], skip_special_tokens=True)}',
+                '----------------------------------------------------------------------------',
+                f'Model output:   {tokenizer.decode(output[i], skip_special_tokens=True)}',
+                sep='\n')
 
     def training_step(self, batch, batch_idx):
+        if batch_idx==0:
+            transformerLightning.check_translation(encoder_input, decoder_input, labels)
         # Extracting required inputs
         encoder_input = batch['encoder_input']
         decoder_input = batch['decoder_input']
@@ -62,6 +67,9 @@ class transformerLightning(L.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
+        if batch_idx==0:
+            transformerLightning.check_translation(encoder_input, decoder_input, labels)
+
         # Extracting required inputs
         encoder_input = batch['encoder_input']
         decoder_input = batch['decoder_input']
@@ -85,12 +93,12 @@ class transformerLightning(L.LightningModule):
 
         # Logging Metrics
         self.log("LOSS_VAL", loss, on_epoch=True, prog_bar=True, logger=True)
-
-        transformerLightning.check_translation(encoder_input, decoder_input, labels)
-
     
     def test_step(self):
         pass
 
     def predict_step(self):
         pass
+
+if __name__ == '__main__':
+    pass
