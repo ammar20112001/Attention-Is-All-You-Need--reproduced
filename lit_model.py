@@ -60,9 +60,6 @@ class transformerLightning(L.LightningModule):
 
         # Logging Metrics
         self.log("LOSS", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        # Translation check
-        if batch_idx==0:
-            transformerLightning.check_translation(encoder_input, decoder_input, labels)
 
         return loss
 
