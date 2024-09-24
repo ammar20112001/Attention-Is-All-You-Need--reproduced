@@ -1,4 +1,3 @@
-from numpy import argmax
 from model import build_transformer
 from dataset import tokenizer
 from config import configuration
