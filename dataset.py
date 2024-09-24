@@ -19,8 +19,6 @@ tokenizer = AutoTokenizer.from_pretrained(config['tokenizer'])
 special_tokens_dict = {'bos_token': '<sos>', 'eos_token': '<eos>', 'unk_token': '<unk>', 'pad_token': '<pad>'}
 tokenizer.add_special_tokens(special_tokens_dict)
 
-pad_token = torch.tensor(tokenizer('<pad>')['input_ids'][1:-1])
-
 class BilingualDataset(Dataset):
     
     def __init__(self) -> None:
