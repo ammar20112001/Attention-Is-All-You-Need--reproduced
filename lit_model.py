@@ -1,11 +1,13 @@
 from model import build_transformer
-from dataset import pad_token
+from dataset import tokenizer
 from config import configuration
 
 import torch
 import lightning as L
 
 config = configuration()
+
+pad_token = torch.tensor(tokenizer('<pad>')['input_ids'][1:-1])
 loss_fn = torch.nn.CrossEntropyLoss(ignore_index=pad_token, label_smoothing=0.1)
 
 class transformerLightning(L.LightningModule):
@@ -24,16 +26,20 @@ class transformerLightning(L.LightningModule):
             d_fc = config['d_fc']
         )
 
+    @staticmethod
+    def check_translation(encoder_input, decoder_input, labels):
+        print(f'Input:          {tokenizer.decode(encoder_input, skip_special_tokens=True)}',
+              f'Target:         {tokenizer.decode(decoder_input, skip_special_tokens=True)}',
+              '----------------------------------------------------------------------------',
+              f'Model output:   {tokenizer.decode(labels, skip_special_tokens=True)}',
+              sep='\n')
+
     def training_step(self, batch, batch_idx):
         # Extracting required inputs
         encoder_input = batch['encoder_input']
         decoder_input = batch['decoder_input']
         encoder_mask = batch['encoder_mask']
         decoder_mask = batch['decoder_mask']
-        '''print(f"\nencoder_input: {encoder_input.shape}")
-        print(f"decoder_input: {decoder_input.shape}")
-        print(f"encoder_mask: {encoder_mask.shape}")
-        print(f"decoder_mask: {decoder_mask.shape}\n")'''
 
         # Encoding source text
         encoder_output = self.transformer.encode(encoder_input, encoder_mask) # --> (B, S, d_model)
@@ -46,8 +52,7 @@ class transformerLightning(L.LightningModule):
 
         # Extracting labels for loss
         labels = batch['labels'] # --> (B, S)
-        '''print(f"\nLOGITS SHAPE: {logits.transpose(1,2).shape}")
-        print(f"TARGET SHAPE: {labels.shape}\n")'''
+
         # Calculating Loss
         loss = loss_fn(logits.transpose(1,2), labels)
 
@@ -57,37 +62,32 @@ class transformerLightning(L.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        try:
-            # Extracting required inputs
-            encoder_input = batch['encoder_input']
-            decoder_input = batch['decoder_input']
-            encoder_mask = batch['encoder_mask']
-            decoder_mask = batch['decoder_mask']
-            '''print(f"\nencoder_input: {encoder_input.shape}")
-            print(f"decoder_input: {decoder_input.shape}")
-            print(f"encoder_mask: {encoder_mask.shape}")
-            print(f"decoder_mask: {decoder_mask.shape}\n")'''
+        # Extracting required inputs
+        encoder_input = batch['encoder_input']
+        decoder_input = batch['decoder_input']
+        encoder_mask = batch['encoder_mask']
+        decoder_mask = batch['decoder_mask']
 
-            # Encoding source text
-            encoder_output = self.transformer.encode(encoder_input, encoder_mask) # --> (B, S, d_model)
+        # Encoding source text
+        encoder_output = self.transformer.encode(encoder_input, encoder_mask) # --> (B, S, d_model)
 
-            # Decoding to target text
-            decoder_output = self.transformer.decode(decoder_input, encoder_output, encoder_mask, decoder_mask) # --> (B, S, d_model)
+        # Decoding to target text
+        decoder_output = self.transformer.decode(decoder_input, encoder_output, encoder_mask, decoder_mask) # --> (B, S, d_model)
 
-            # Projecting from (B, S, d_model) to (B, S, V)
-            logits = self.transformer.project(decoder_output) # --> (B, S, V)
+        # Projecting from (B, S, d_model) to (B, S, V)
+        logits = self.transformer.project(decoder_output) # --> (B, S, V)
 
-            # Extracting labels for loss
-            labels = batch['labels'] # --> (B, S)
-            '''print(f"\nLOGITS SHAPE: {logits.transpose(1,2).shape}")
-            print(f"TARGET SHAPE: {labels.shape}\n")'''
-            # Calculating Loss
-            loss = loss_fn(logits.transpose(1,2), labels)
+        # Extracting labels for loss
+        labels = batch['labels'] # --> (B, S)
 
-            # Logging Metrics
-            self.log("LOSS_VAL", loss, on_epoch=True, prog_bar=True, logger=True)
-        except:
-            print('Failed to run validation step')
+        # Calculating Loss
+        loss = loss_fn(logits.transpose(1,2), labels)
+
+        # Logging Metrics
+        self.log("LOSS_VAL", loss, on_epoch=True, prog_bar=True, logger=True)
+
+        transformerLightning.check_translation(encoder_input, decoder_input, labels)
+
     
     def test_step(self):
         pass
