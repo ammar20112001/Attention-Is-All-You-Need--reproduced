@@ -43,10 +43,6 @@ class transformerLightning(L.LightningModule):
         encoder_mask = batch['encoder_mask']
         decoder_mask = batch['decoder_mask']
 
-        # Translation check
-        if batch_idx==0:
-            transformerLightning.check_translation(encoder_input, decoder_input, labels)
-
         # Encoding source text
         encoder_output = self.transformer.encode(encoder_input, encoder_mask) # --> (B, S, d_model)
 
@@ -64,6 +60,9 @@ class transformerLightning(L.LightningModule):
 
         # Logging Metrics
         self.log("LOSS", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        # Translation check
+        if batch_idx==0:
+            transformerLightning.check_translation(encoder_input, decoder_input, labels)
 
         return loss
 
@@ -73,10 +72,6 @@ class transformerLightning(L.LightningModule):
         decoder_input = batch['decoder_input']
         encoder_mask = batch['encoder_mask']
         decoder_mask = batch['decoder_mask']
-
-        # Translation check
-        if batch_idx==0:
-            transformerLightning.check_translation(encoder_input, decoder_input, labels)
 
         # Encoding source text
         encoder_output = self.transformer.encode(encoder_input, encoder_mask) # --> (B, S, d_model)
@@ -95,6 +90,9 @@ class transformerLightning(L.LightningModule):
 
         # Logging Metrics
         self.log("LOSS_VAL", loss, on_epoch=True, prog_bar=True, logger=True)
+        # Translation check
+        if batch_idx==0:
+            transformerLightning.check_translation(encoder_input, decoder_input, labels)
     
     def test_step(self):
         pass
