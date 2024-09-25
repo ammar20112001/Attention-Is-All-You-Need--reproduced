@@ -5,8 +5,15 @@ from config import configuration
 import torch
 import lightning as L
 from lightning.pytorch.loggers import WandbLogger
+from lightning.pytorch.callbacks import ModelCheckpoint
 
+# Callbacks
+checkpoint_callback = ModelCheckpoint(monitor='val/loss', mode='max')
+callbacks_list = [checkpoint_callback]
+
+# W&B logger
 wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced", log_model="all")
+
 config = configuration()
 
 pad_token = torch.tensor(tokenizer('<pad>')['input_ids'][1:-1])
