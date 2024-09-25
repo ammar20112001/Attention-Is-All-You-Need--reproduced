@@ -33,23 +33,26 @@ class transformerLightning(L.LightningModule):
     @staticmethod
     def check_translation(encoder_input, decoder_input, labels):
         output = torch.argmax(labels, dim=-1)
-        output_logs = {'input': [], 'target': [], 'output': []}
+        data = []
 
         print('\n')
         for i in range(10):
-            output_logs['input'].append(tokenizer.decode(encoder_input[i], skip_special_tokens=True))
-            output_logs['target'].append(tokenizer.decode(decoder_input[i], skip_special_tokens=True))
-            output_logs['output'].append(tokenizer.decode(output[i], skip_special_tokens=True))
+            data.append(
+                [
+                  tokenizer.decode(encoder_input[i], skip_special_tokens=True),
+                  tokenizer.decode(decoder_input[i], skip_special_tokens=True),
+                  tokenizer.decode(output[i], skip_special_tokens=True)
+                ]
+            )
 
-            print(f"\n\nInput:      {output_logs['input'][i]}",
-                f"Target:           {output_logs['target'][i]}",
-                '---------------------------------------------------------------------------------',
-                f"Model output:     {output_logs['output'][i]}",
-                sep='\n')
+            print(f"\n\nInput:      {data[i][0]}",
+                  f"Target:           {data[i][1]}",
+                  '---------------------------------------------------------------------------------',
+                  f"Model output:     {data[i][2]}",
+                  sep='\n')
         print('\n\n')
 
         columns = ['Input', 'Target', 'Model output']
-        data = [[output_logs['input']], [output_logs['target']], [output_logs['output']]]
         return  columns, data
 
     def training_step(self, batch, batch_idx):
