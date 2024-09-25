@@ -9,7 +9,6 @@ from lightning.pytorch.callbacks import ModelCheckpoint
 
 # Callbacks
 checkpoint_callback = ModelCheckpoint(monitor='LOSS_VAL', mode='max')
-callbacks_list = [checkpoint_callback]
 
 # W&B logger
 wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced", log_model="all")
@@ -44,7 +43,7 @@ class transformerLightning(L.LightningModule):
         columns = ['Input', 'Target', 'Model output']
 
         #print('\n')
-        for i in range(len(config['log_text_len'])):
+        for i in range(config['log_text_len']):
             data.append(
                 [
                   tokenizer.decode(encoder_input[i], skip_special_tokens=True),
