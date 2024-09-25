@@ -4,7 +4,9 @@ from config import configuration
 
 import torch
 import lightning as L
+from lightning.pytorch.loggers import WandbLogger
 
+wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced")
 config = configuration()
 
 pad_token = torch.tensor(tokenizer('<pad>')['input_ids'][1:-1])
@@ -104,7 +106,7 @@ class transformerLightning(L.LightningModule):
         # Translation check
         if batch_idx==0:
             columns, data = transformerLightning.check_translation(encoder_input, decoder_input, labels)
-            self.log_text(key="samples", columns=columns, data=data)
+            wandb_logger.log_text(key="samples", columns=columns, data=data)
     
     def test_step(self):
         pass

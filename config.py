@@ -5,7 +5,7 @@ def configuration():
         "lang_tgt": "it",
         "datasource": 'opus_books',
 
-        'batch_size': 32,
+        'batch_size': 64,
 
         'train_frac': 0.9,
         'test_val_frac': 0.5,
