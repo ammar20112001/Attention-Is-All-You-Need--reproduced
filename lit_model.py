@@ -43,7 +43,7 @@ class transformerLightning(L.LightningModule):
         columns = ['Input', 'Target', 'Model output']
 
         #print('\n')
-        for i in range(len(config['log_text_len'])):
+        for i in range(config['log_text_len']):
             data.append(
                 [
                   tokenizer.decode(encoder_input[i], skip_special_tokens=True),
