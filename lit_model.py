@@ -5,8 +5,15 @@ from config import configuration
 import torch
 import lightning as L
 from lightning.pytorch.loggers import WandbLogger
+from lightning.pytorch.callbacks import ModelCheckpoint
 
-wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced")
+# Callbacks
+checkpoint_callback = ModelCheckpoint(monitor='val/loss', mode='max')
+callbacks_list = [checkpoint_callback]
+
+# W&B logger
+wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced", log_model="all")
+
 config = configuration()
 
 pad_token = torch.tensor(tokenizer('<pad>')['input_ids'][1:-1])
@@ -34,9 +41,10 @@ class transformerLightning(L.LightningModule):
     def check_translation(encoder_input, decoder_input, labels):
         output = torch.argmax(labels, dim=-1)
         data = []
+        columns = ['Input', 'Target', 'Model output']
 
-        print('\n')
-        for i in range(10):
+        #print('\n')
+        for i in range(len(config['log_text_len'])):
             data.append(
                 [
                   tokenizer.decode(encoder_input[i], skip_special_tokens=True),
@@ -44,15 +52,12 @@ class transformerLightning(L.LightningModule):
                   tokenizer.decode(output[i], skip_special_tokens=True)
                 ]
             )
-
-            print(f"\n\nInput:      {data[i][0]}",
-                  f"Target:           {data[i][1]}",
-                  '---------------------------------------------------------------------------------',
-                  f"Model output:     {data[i][2]}",
-                  sep='\n')
-        print('\n\n')
-
-        columns = ['Input', 'Target', 'Model output']
+            #print(f"\n\nInput:      {data[i][0]}",
+            #      f"Target:         {data[i][1]}",
+            #      '---------------------------------------------------------------------------------',
+            #      f"Model output:   {data[i][2]}",
+            #      sep='\n')
+        #print('\n\n')
         return  columns, data
 
     def training_step(self, batch, batch_idx):
@@ -104,9 +109,8 @@ class transformerLightning(L.LightningModule):
         # Calculating Loss
         loss = loss_fn(logits.transpose(1,2), labels)
 
-        # Logging Metrics
-        self.log("LOSS_VAL", loss, on_epoch=True, prog_bar=True, logger=True)
-        # Translation check
+        # Logging metrics and text
+        self.log("LOSS_VAL", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         if batch_idx==0:
             columns, data = transformerLightning.check_translation(encoder_input, decoder_input, logits)
             wandb_logger.log_text(key="samples", columns=columns, data=data)
