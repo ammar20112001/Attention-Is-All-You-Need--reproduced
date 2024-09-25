@@ -6,7 +6,7 @@ import torch
 import lightning as L
 from lightning.pytorch.loggers import WandbLogger
 
-wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced")
+wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced", log_model="all")
 config = configuration()
 
 pad_token = torch.tensor(tokenizer('<pad>')['input_ids'][1:-1])
