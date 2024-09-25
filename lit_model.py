@@ -108,7 +108,7 @@ class transformerLightning(L.LightningModule):
         self.log("LOSS_VAL", loss, on_epoch=True, prog_bar=True, logger=True)
         # Translation check
         if batch_idx==0:
-            columns, data = transformerLightning.check_translation(encoder_input, decoder_input, labels)
+            columns, data = transformerLightning.check_translation(encoder_input, decoder_input, logits)
             wandb_logger.log_text(key="samples", columns=columns, data=data)
     
     def test_step(self):
