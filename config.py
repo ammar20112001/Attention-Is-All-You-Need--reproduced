@@ -9,6 +9,8 @@ def configuration():
 
         'train_frac': 0.9,
         'test_val_frac': 0.5,
+        'train_rows': 10_000,
+        'test_val_rows': 1_000,
 
         'tokenizer': 'bert-base-uncased',
         
