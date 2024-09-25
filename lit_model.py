@@ -9,7 +9,6 @@ from lightning.pytorch.callbacks import ModelCheckpoint
 
 # Callbacks
 checkpoint_callback = ModelCheckpoint(monitor='LOSS_VAL', mode='max')
-callbacks_list = [checkpoint_callback]
 
 # W&B logger
 wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced", log_model="all")
