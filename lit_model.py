@@ -31,14 +31,24 @@ class transformerLightning(L.LightningModule):
     @staticmethod
     def check_translation(encoder_input, decoder_input, labels):
         output = torch.argmax(labels, dim=-1)
+        output_logs = {'input': [], 'target': [], 'output': []}
+
         print('\n')
         for i in range(10):
-            print(f'\n\nInput:          {tokenizer.decode(encoder_input[i], skip_special_tokens=True)}',
-                f'Target:         {tokenizer.decode(decoder_input[i], skip_special_tokens=True)}',
-                '----------------------------------------------------------------------------',
-                f'Model output:   {tokenizer.decode(output[i], skip_special_tokens=True)}',
+            output_logs['input'].append(tokenizer.decode(encoder_input[i], skip_special_tokens=True))
+            output_logs['target'].append(tokenizer.decode(encoder_input[i], skip_special_tokens=True))
+            output_logs['output'].append(tokenizer.decode(output[i], skip_special_tokens=True))
+
+            print(f'\n\nInput:      {output['input'][i]}',
+                f'Target:           {output['target'][i]}',
+                '---------------------------------------------------------------------------------',
+                f'Model output:     {output['output'][i]}',
                 sep='\n')
         print('\n\n')
+
+        columns = ['Input', 'Target', 'Model output']
+        data = [[output_logs['input']], [output_logs['target']], [output_logs['output']]]
+        return  columns, data
 
     def training_step(self, batch, batch_idx):
         # Extracting required inputs
@@ -93,7 +103,8 @@ class transformerLightning(L.LightningModule):
         self.log("LOSS_VAL", loss, on_epoch=True, prog_bar=True, logger=True)
         # Translation check
         if batch_idx==0:
-            transformerLightning.check_translation(encoder_input, decoder_input, labels)
+            columns, data = transformerLightning.check_translation(encoder_input, decoder_input, labels)
+            self.log_text(key="samples", columns=columns, data=data)
     
     def test_step(self):
         pass
