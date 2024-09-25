@@ -25,5 +25,8 @@ def configuration():
         'src_vocab_size': 40_000,
         'tgt_vocab_size': 40_000,
         'dropout': 0.1, # In paper: 0.1
-        'd_fc': 1024 # In paper: 2048
+        'd_fc': 1024, # In paper: 2048
+
+        # W&B configs
+        'log_text_len': 15
     }
