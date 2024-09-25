@@ -8,7 +8,7 @@ from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import ModelCheckpoint
 
 # Callbacks
-checkpoint_callback = ModelCheckpoint(monitor='val/loss', mode='max')
+checkpoint_callback = ModelCheckpoint(monitor='LOSS_VAL', mode='max')
 callbacks_list = [checkpoint_callback]
 
 # W&B logger
