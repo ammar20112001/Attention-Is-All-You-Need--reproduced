@@ -36,7 +36,7 @@ class transformerLightning(L.LightningModule):
         print('\n')
         for i in range(10):
             output_logs['input'].append(tokenizer.decode(encoder_input[i], skip_special_tokens=True))
-            output_logs['target'].append(tokenizer.decode(encoder_input[i], skip_special_tokens=True))
+            output_logs['target'].append(tokenizer.decode(decoder_input[i], skip_special_tokens=True))
             output_logs['output'].append(tokenizer.decode(output[i], skip_special_tokens=True))
 
             print(f"\n\nInput:      {output_logs['input'][i]}",
