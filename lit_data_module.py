@@ -32,6 +32,11 @@ class DataModuleLightning(LightningDataModule):
         self.val_indices = [i for i in range(self.train_indices[-1], math.floor((self.train_frac + ((1 - self.train_frac) * self.test_val_frac)) * len(self.dataset.ds['train'])))]
         self.test_indices = [i for i in range(self.val_indices[-1], len(self.dataset.ds['train']))]
 
+        if config['train_rows'] is not False:
+            self.train_indices = self.train_indices[:config['train_rows']]
+            self.val_indices = self.train_indices[:config['test_val_rows']]
+            self.test_indices = self.train_indices[:config['test_val_rows']]
+
         print('\n\nTRAIN/VAL/TEST SETS:')
         print(len(self.train_indices), len(self.val_indices), len(self.test_indices), sep='\n')
         print('\n')
