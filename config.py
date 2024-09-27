@@ -17,6 +17,10 @@ def configuration():
         'enc_max_seq_len': 256, # In paper: 512
         'dec_max_seq_len': 256, # In paper: 512
 
+        # Learning rate and Optimizer
+        'lr': 0.001,
+        'optimizer': 'Adam',
+
         # Transformer model architecture details
         'd_model': 256, # In paper: 512
         'heads': 4, # In paper: 8
