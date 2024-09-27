@@ -121,5 +121,8 @@ class transformerLightning(L.LightningModule):
     def predict_step(self):
         pass
 
+    def configure_optimizers(self) -> torch.optim.Optimizer:
+        return torch.optim.Adam(self.parameters(), lr=self.config['lr'])
+
 if __name__ == '__main__':
     pass
