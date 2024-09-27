@@ -12,7 +12,6 @@ from datasets import load_dataset
 
 
 config = configuration()
-print('\n\n',config['dataset'],'\n\n')
 
 # Initializing tokenizer
 tokenizer = AutoTokenizer.from_pretrained(config['tokenizer'])
@@ -21,12 +20,13 @@ tokenizer.add_special_tokens(special_tokens_dict)
 
 class BilingualDataset(Dataset):
     
-    def __init__(self) -> None:
+    def __init__(self, config_arg=config) -> None:
         super().__init__()
+        self.config = config_arg
         # Create dataset
-        self.ds = BilingualDataset.get_ds(config, tokenize=True)
-        self.enc_max_seq_len = config['enc_max_seq_len']
-        self.dec_max_seq_len = config['dec_max_seq_len']
+        self.ds = BilingualDataset.get_ds(self.config, tokenize=True)
+        self.enc_max_seq_len = self.config['enc_max_seq_len']
+        self.dec_max_seq_len = self.config['dec_max_seq_len']
 
         # Initializing special tokens
         self.sos_token = torch.tensor(tokenizer('<sos>')['input_ids'][1:-1])
