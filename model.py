@@ -311,14 +311,14 @@ class Transformer(nn.Module):
         return self.projection_layer(x) # (B, S, V)
     
 def build_transformer(
-        d_model: int = config['d_model'],
-        heads: int = config['heads'],
-        n_stack: int = config['n_stack'],
-        max_seq_len: int = config['max_seq_len'],
-        src_vocab_size: int = config['src_vocab_size'],
-        tgt_vocab_size: int = config['tgt_vocab_size'],
-        dropout: float = config['dropout'],
-        d_fc: int = config['d_fc']
+        d_model: int = config['model_configs']['d_model'],
+        heads: int = config['model_configs']['heads'],
+        n_stack: int = config['model_configs']['n_stack'],
+        max_seq_len: int = config['model_configs']['max_seq_len'],
+        src_vocab_size: int = config['model_configs']['src_vocab_size'],
+        tgt_vocab_size: int = config['model_configs']['tgt_vocab_size'],
+        dropout: float = config['model_configs']['dropout'],
+        d_fc: int = config['model_configs']['d_fc']
         ):
     
     # Create Embedding layer instances
