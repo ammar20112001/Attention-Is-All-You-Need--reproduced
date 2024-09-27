@@ -13,16 +13,16 @@ checkpoint_callback = ModelCheckpoint(monitor='LOSS_VAL', mode='max')
 # W&B logger
 wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced", log_model="all")
 
-configuration = configuration()
+config = configuration()
 
 pad_token = torch.tensor(tokenizer('<pad>')['input_ids'][1:-1])
 loss_fn = torch.nn.CrossEntropyLoss(ignore_index=pad_token, label_smoothing=0.1)
 
 class transformerLightning(L.LightningModule):
     
-    def __init__(self, config=configuration):
+    def __init__(self, config_arg=config):
         super().__init__()
-        self.config = config
+        self.config = config_arg
         # Initialize transformer model
         self.transformer = build_transformer(
             d_model = self.config['d_model'],
