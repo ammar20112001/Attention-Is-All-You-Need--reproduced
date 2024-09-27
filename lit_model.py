@@ -13,37 +13,38 @@ checkpoint_callback = ModelCheckpoint(monitor='LOSS_VAL', mode='max')
 # W&B logger
 wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced", log_model="all")
 
-config = configuration()
+configuration = configuration()
 
 pad_token = torch.tensor(tokenizer('<pad>')['input_ids'][1:-1])
 loss_fn = torch.nn.CrossEntropyLoss(ignore_index=pad_token, label_smoothing=0.1)
 
 class transformerLightning(L.LightningModule):
     
-    def __init__(self):
+    def __init__(self, config=configuration):
         super().__init__()
+        self.config = config
         # Initialize transformer model
         self.transformer = build_transformer(
-            d_model = config['d_model'],
-            heads = config['heads'],
-            n_stack = config['n_stack'],
-            max_seq_len = config['max_seq_len'],
-            src_vocab_size = config['src_vocab_size'],
-            tgt_vocab_size = config['tgt_vocab_size'],
-            dropout = config['dropout'],
-            d_fc = config['d_fc']
+            d_model = self.config['d_model'],
+            heads = self.config['heads'],
+            n_stack = self.config['n_stack'],
+            max_seq_len = self.config['max_seq_len'],
+            src_vocab_size = self.config['src_vocab_size'],
+            tgt_vocab_size = self.config['tgt_vocab_size'],
+            dropout = self.config['dropout'],
+            d_fc = self.config['d_fc']
         )
         # Log hyper-parameters
         self.save_hyperparameters()
 
     @staticmethod
-    def check_translation(encoder_input, decoder_input, labels):
+    def check_translation(encoder_input, decoder_input, labels, log_text_len):
         output = torch.argmax(labels, dim=-1)
         data = []
         columns = ['Input', 'Target', 'Model output']
 
         #print('\n')
-        for i in range(config['log_text_len']):
+        for i in range(log_text_len):
             data.append(
                 [
                   tokenizer.decode(encoder_input[i], skip_special_tokens=True),
@@ -111,7 +112,7 @@ class transformerLightning(L.LightningModule):
         # Logging metrics and text
         self.log("LOSS_VAL", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         if batch_idx==0:
-            columns, data = transformerLightning.check_translation(encoder_input, decoder_input, logits)
+            columns, data = transformerLightning.check_translation(encoder_input, decoder_input, logits, self.config['log_text_len'])
             wandb_logger.log_text(key="samples", columns=columns, data=data)
     
     def test_step(self):
