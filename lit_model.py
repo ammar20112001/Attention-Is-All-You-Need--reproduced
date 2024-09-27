@@ -38,6 +38,8 @@ class transformerLightning(L.LightningModule):
         )
         # Log hyper-parameters
         self.save_hyperparameters()
+        # W&B watch to log gradients and model topology
+        wandb_logger.watch(self.transformer, log="all", log_freq=250)
 
     @staticmethod
     def check_translation(encoder_input, decoder_input, labels, log_text_len):
