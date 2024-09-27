@@ -35,8 +35,8 @@ class DataModuleLightning(LightningDataModule):
 
         if self.config['dataset_configs']['train_rows'] is not False:
             self.train_indices = self.train_indices[:self.config['dataset_configs']['train_rows']]
-            self.val_indices = self.train_indices[:self.config['dataset_configs']['test_val_rows']]
-            self.test_indices = self.train_indices[:self.config['dataset_configs']['test_val_rows']]
+            self.val_indices = self.val_indices[:self.config['dataset_configs']['test_val_rows']]
+            self.test_indices = self.test_indices[:self.config['dataset_configs']['test_val_rows']]
 
         print('\n\nTRAIN/VAL/TEST SETS:', len(self.train_indices), len(self.val_indices), len(self.test_indices), sep='\n')
         print('\n')
