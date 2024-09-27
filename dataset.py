@@ -4,7 +4,7 @@ from config import configuration
 import random
 
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
 from transformers import AutoTokenizer
 
@@ -147,12 +147,4 @@ class BilingualDataset(Dataset):
 
 
 if __name__ == '__main__':
-    ds = BilingualDataset()
-
-    for i in range(10):
-        x = ds.__getitem__(random.randrange(0, ds.__len__()))
-        for key, value in x.items():
-            print(key, value.shape)
-
-        print('\n')
-        #print(tokenizer.decode(x['encoder_input']), tokenizer.decode(x['decoder_input'], sep='\n'))
+    pass

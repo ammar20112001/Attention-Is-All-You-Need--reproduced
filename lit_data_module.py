@@ -1,5 +1,3 @@
-from calendar import c
-
 import math
 
 import torch.utils
@@ -40,8 +38,7 @@ class DataModuleLightning(LightningDataModule):
             self.val_indices = self.train_indices[:self.config['test_val_rows']]
             self.test_indices = self.train_indices[:self.config['test_val_rows']]
 
-        print('\n\nTRAIN/VAL/TEST SETS:')
-        print(len(self.train_indices), len(self.val_indices), len(self.test_indices), sep='\n')
+        print('\n\nTRAIN/VAL/TEST SETS:', len(self.train_indices), len(self.val_indices), len(self.test_indices), sep='\n')
         print('\n')
 
     def prepare_data(self):

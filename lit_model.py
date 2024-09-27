@@ -52,12 +52,6 @@ class transformerLightning(L.LightningModule):
                   tokenizer.decode(output[i], skip_special_tokens=True)
                 ]
             )
-            #print(f"\n\nInput:      {data[i][0]}",
-            #      f"Target:         {data[i][1]}",
-            #      '---------------------------------------------------------------------------------',
-            #      f"Model output:   {data[i][2]}",
-            #      sep='\n')
-        #print('\n\n')
         return  columns, data
 
     def training_step(self, batch, batch_idx):
