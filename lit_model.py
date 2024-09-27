@@ -7,6 +7,8 @@ import lightning as L
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import ModelCheckpoint
 
+import wandb
+
 # Callbacks
 checkpoint_callback = ModelCheckpoint(monitor='LOSS_VAL', mode='max')
 
@@ -108,6 +110,19 @@ class transformerLightning(L.LightningModule):
         if batch_idx==0:
             columns, data = transformerLightning.check_translation(encoder_input, decoder_input, logits, self.config['wandb_configs']['log_text_len'])
             wandb_logger.log_text(key="samples", columns=columns, data=data)
+
+        return logits
+    
+    def on_validation_epoch_end(self, validation_step_outputs) -> None:
+        # Log histogram of logits
+        flattened_logits = torch.flatten(torch.cat(validation_step_outputs))
+        self.logger.experiment.log(
+            {
+                'valid/logits': wandb.Histogram(flattened_logits.to('cpu')),
+                'global_step': self.global_step
+            }
+        )
+        return super().on_validation_epoch_end()
     
     def test_step(self):
         pass
