@@ -25,14 +25,14 @@ class transformerLightning(L.LightningModule):
         self.config = config_arg
         # Initialize transformer model
         self.transformer = build_transformer(
-            d_model = self.config['d_model'],
-            heads = self.config['heads'],
-            n_stack = self.config['n_stack'],
-            max_seq_len = self.config['max_seq_len'],
-            src_vocab_size = self.config['src_vocab_size'],
-            tgt_vocab_size = self.config['tgt_vocab_size'],
-            dropout = self.config['dropout'],
-            d_fc = self.config['d_fc']
+            d_model = self.config['model_configs']['d_model'],
+            heads = self.config['model_configs']['heads'],
+            n_stack = self.config['model_configs']['n_stack'],
+            max_seq_len = self.config['model_configs']['max_seq_len'],
+            src_vocab_size = self.config['model_configs']['src_vocab_size'],
+            tgt_vocab_size = self.config['model_configs']['tgt_vocab_size'],
+            dropout = self.config['model_configs']['dropout'],
+            d_fc = self.config['model_configs']['d_fc']
         )
         # Log hyper-parameters
         self.save_hyperparameters()
@@ -106,7 +106,7 @@ class transformerLightning(L.LightningModule):
         # Logging metrics and text
         self.log("LOSS_VAL", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         if batch_idx==0:
-            columns, data = transformerLightning.check_translation(encoder_input, decoder_input, logits, self.config['log_text_len'])
+            columns, data = transformerLightning.check_translation(encoder_input, decoder_input, logits, self.config['wandb_configs']['log_text_len'])
             wandb_logger.log_text(key="samples", columns=columns, data=data)
     
     def test_step(self):
@@ -116,7 +116,7 @@ class transformerLightning(L.LightningModule):
         pass
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
-        return torch.optim.Adam(self.parameters(), lr=self.config['lr'])
+        return torch.optim.Adam(self.parameters(), lr=self.config['training_configs']['lr'])
 
 if __name__ == '__main__':
     pass
