@@ -106,7 +106,7 @@ class transformerLightning(L.LightningModule):
 
         # Projecting from (B, S, d_model) to (B, S, V)
         logits = self.transformer.project(decoder_output) # --> (B, S, V)
-        self.logits.append(logits)
+        #self.logits.append(logits)
 
         # Extracting labels for loss
         labels = batch['labels'] # --> (B, S)
