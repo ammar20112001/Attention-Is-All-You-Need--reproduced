@@ -44,7 +44,7 @@ class transformerLightning(L.LightningModule):
         wandb_logger.watch(self.transformer, log="all", log_freq=250)
 
         # Store logits for histograms
-        self.logits = []
+        #self.logits = []
 
 
     @staticmethod
@@ -120,7 +120,7 @@ class transformerLightning(L.LightningModule):
             columns, data = transformerLightning.check_translation(encoder_input, decoder_input, logits, self.config['wandb_configs']['log_text_len'])
             wandb_logger.log_text(key="samples", columns=columns, data=data)
     
-    def on_validation_epoch_end(self) -> None:
+    '''def on_validation_epoch_end(self) -> None:
         # Log histogram of logits
         flattened_logits = torch.flatten(torch.cat(self.logits))
         self.logger.experiment.log(
@@ -129,7 +129,7 @@ class transformerLightning(L.LightningModule):
                 'global_step': self.global_step
             }
         )
-        self.logits = [] # Reset logits for next validation run
+        self.logits = [] # Reset logits for next validation run'''
     
     def test_step(self):
         pass
