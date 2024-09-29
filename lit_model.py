@@ -41,7 +41,7 @@ class transformerLightning(L.LightningModule):
         self.save_hyperparameters()
         
         # W&B watch to log gradients and model topology
-        #wandb_logger.watch(self.transformer, log="all", log_freq=250)
+        # wandb_logger.watch(self.transformer, log="all", log_freq=250)
 
         # Store logits for histograms
         self.logits = []
@@ -106,7 +106,6 @@ class transformerLightning(L.LightningModule):
 
         # Projecting from (B, S, d_model) to (B, S, V)
         logits = self.transformer.project(decoder_output) # --> (B, S, V)
-        self.logits.append(logits)
 
         # Extracting labels for loss
         labels = batch['labels'] # --> (B, S)
@@ -119,6 +118,8 @@ class transformerLightning(L.LightningModule):
         if batch_idx==0:
             columns, data = transformerLightning.check_translation(encoder_input, decoder_input, logits, self.config['wandb_configs']['log_text_len'])
             wandb_logger.log_text(key="samples", columns=columns, data=data)
+            # Append logits for histogram logging of logits
+            self.logits.append(logits.cpu())
     
     def on_validation_epoch_end(self) -> None:
         # Log histogram of logits
