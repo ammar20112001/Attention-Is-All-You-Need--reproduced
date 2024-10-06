@@ -23,7 +23,8 @@ def train(config=None):
     # Create data instance
     dataset = DataModuleLightning(config)
     # Create dataloader
-    train_loader = DataModuleLightning.train_dataloader()
+    dataset.setup(stage='fit')
+    train_loader = dataset.train_dataloader()
 
     # Create model instance
     model = transformerLightning(config)
