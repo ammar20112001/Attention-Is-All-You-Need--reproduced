@@ -40,6 +40,7 @@ def sweep_configuration():
             'dec_max_seq_len': {'value': 256}, # In paper: 512
 
             # Training configurations
+            'epochs': {'value': 1},
             # Learning rate
             'lr': {'value': 0.001},
             'optimizer': {'value': 'Adam'}, # Hard coded

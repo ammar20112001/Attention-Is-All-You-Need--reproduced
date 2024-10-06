@@ -29,6 +29,7 @@ def configuration():
         'dec_max_seq_len': 256, # In paper: 512
 
         # Training configurations
+        'epochs': 1,
         # Learning rate
         'lr': 0.001,
         'optimizer': 'Adam', # Hard coded
