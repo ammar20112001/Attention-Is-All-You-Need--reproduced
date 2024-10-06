@@ -30,7 +30,7 @@ def train(config=None):
     model = transformerLightning(config)
 
     # Train model
-    trainer = L.Trainer(config.epochs)
+    trainer = L.Trainer(max_epochs=config.epochs)
     trainer.fit(model=model, train_dataloaders=train_loader)
 
 wandb.agent(sweep_id, train, count=3)
