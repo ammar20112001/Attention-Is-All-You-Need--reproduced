@@ -11,7 +11,7 @@ from datasets import load_dataset
 config = configuration()
 
 # Initializing tokenizer
-tokenizer = AutoTokenizer.from_pretrained(config['dataset_configs']['tokenizer'])
+tokenizer = AutoTokenizer.from_pretrained(config['tokenizer'])
 special_tokens_dict = {'bos_token': '<sos>', 'eos_token': '<eos>', 'unk_token': '<unk>', 'pad_token': '<pad>'}
 tokenizer.add_special_tokens(special_tokens_dict)
 
@@ -22,8 +22,8 @@ class BilingualDataset(Dataset):
         self.config = config_arg
         # Create dataset
         self.ds = BilingualDataset.get_ds(self.config, tokenize=True)
-        self.enc_max_seq_len = self.config['model_configs']['enc_max_seq_len']
-        self.dec_max_seq_len = self.config['model_configs']['dec_max_seq_len']
+        self.enc_max_seq_len = self.config['enc_max_seq_len']
+        self.dec_max_seq_len = self.config['dec_max_seq_len']
 
         # Initializing special tokens
         self.sos_token = torch.tensor(tokenizer('<sos>')['input_ids'][1:-1])
@@ -124,11 +124,11 @@ class BilingualDataset(Dataset):
 
     @staticmethod
     def get_tokenizer(config):
-        return AutoTokenizer.from_pretrained(config['dataset_configs']['tokenizer'])
+        return AutoTokenizer.from_pretrained(config['tokenizer'])
     
     @staticmethod
     def tokenize_text(sentence):
-        return tokenizer(sentence['text'], add_special_tokens=False, truncation=True, max_length=config['model_configs']['dec_max_seq_len'])
+        return tokenizer(sentence['text'], add_special_tokens=False, truncation=True, max_length=config['dec_max_seq_len'])
 
     @staticmethod
     def causal_mask(size):
@@ -137,7 +137,7 @@ class BilingualDataset(Dataset):
 
     @staticmethod
     def get_ds(config, tokenize=True):        
-        ds = load_dataset(config['dataset_configs']['dataset'])
+        ds = load_dataset(config['dataset'])
         if tokenize == True:
             ds = ds.map(BilingualDataset.tokenize_text, batched=True)
         return ds
