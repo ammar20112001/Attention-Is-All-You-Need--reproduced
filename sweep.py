@@ -7,19 +7,29 @@ import lightning as L
 
 import wandb
 
-wandb.login()
 # Import sweep configuration
-config = configuration()
 sweep_config = sweep_configuration()
 
-# Create data instance
-dataset = DataModuleLightning(config)
-# Create dataloader
-train_loader = DataModuleLightning.train_dataloader()
+wandb.login()
+sweep_id = wandb.sweep(sweep_config, project="Attention-Is-All-You-Need--reproduced")
 
-# Create model instance
-model = transformerLightning(config)
+def train(config=None):
+    # Initialize new wandb run
+    with wandb.init(config=config):
+        # if called by wandb agent, as below, 
+        # this config will be set by Sweep Controller
+        config = wandb.config
 
-# Train model
-trainer = L.Trainer()
-trainer.fit(model=model, train_dataloaders=train_loader)
+    # Create data instance
+    dataset = DataModuleLightning(config)
+    # Create dataloader
+    train_loader = DataModuleLightning.train_dataloader()
+
+    # Create model instance
+    model = transformerLightning(config)
+
+    # Train model
+    trainer = L.Trainer(config.epochs)
+    trainer.fit(model=model, train_dataloaders=train_loader)
+
+wandb.agent(sweep_id, train, count=3)
