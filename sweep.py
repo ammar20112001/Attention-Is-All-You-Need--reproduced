@@ -20,18 +20,18 @@ def train(config=None):
         # this config will be set by Sweep Controller
         config = wandb.config
 
-    # Create data instance
-    dataset = DataModuleLightning(config)
+        # Create data instance
+        dataset = DataModuleLightning(config)
 
-    # Create model instance
-    model = transformerLightning(config)
+        # Create model instance
+        model = transformerLightning(config)
 
-    # Train model
-    trainer = L.Trainer(max_epochs=config.epochs, 
-                        callbacks=[checkpoint_callback], 
-                        logger=wandb_logger)
-    trainer.fit(model=model, 
-                datamodule=dataset,
-                )
+        # Train model
+        trainer = L.Trainer(max_epochs=config.epochs, 
+                            callbacks=[checkpoint_callback], 
+                            logger=wandb_logger)
+        trainer.fit(model=model, 
+                    datamodule=dataset,
+                    )
 
 wandb.agent(sweep_id, train, count=3)
