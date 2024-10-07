@@ -45,7 +45,9 @@ def sweep_configuration():
             'lr': {
                 'values': [0.001, 0.01, 0.1, 0.0001]
                 },
-            'optimizer': {'value': 'Adam'}, # Hard coded
+            'optimizer': {
+                'values': ['Adam', 'SGD']
+                          },
 
             # W&B configs
             'log_text_len': {'value': 15}
