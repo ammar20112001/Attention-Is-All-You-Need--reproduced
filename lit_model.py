@@ -139,7 +139,10 @@ class transformerLightning(L.LightningModule):
         pass
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
-        return torch.optim.Adam(self.parameters(), lr=self.config['lr'])
+        if config['optimizer'] == 'Adam':
+            return torch.optim.Adam(self.parameters(), lr=self.config['lr'])
+        elif config['optimizer'] == 'SGD':
+            return torch.optim.SGD(self.parameters(), lr=self.config['lr'])
 
 if __name__ == '__main__':
     pass
