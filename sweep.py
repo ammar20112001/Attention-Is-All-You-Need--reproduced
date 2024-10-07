@@ -1,4 +1,4 @@
-from lit_model import transformerLightning
+from lit_model import transformerLightning, checkpoint_callback, wandb_logger
 from lit_data_module import DataModuleLightning
 from config import configuration
 from sweep_config import sweep_configuration
@@ -22,15 +22,16 @@ def train(config=None):
 
     # Create data instance
     dataset = DataModuleLightning(config)
-    # Create dataloader
-    dataset.setup(stage='fit')
-    train_loader = dataset.train_dataloader()
 
     # Create model instance
     model = transformerLightning(config)
 
     # Train model
-    trainer = L.Trainer(max_epochs=config.epochs)
-    trainer.fit(model=model, train_dataloaders=train_loader)
+    trainer = L.Trainer(max_epochs=config.epochs, 
+                        callbacks=[checkpoint_callback], 
+                        logger=wandb_logger)
+    trainer.fit(model=model, 
+                datamodule=dataset,
+                )
 
 wandb.agent(sweep_id, train, count=3)
