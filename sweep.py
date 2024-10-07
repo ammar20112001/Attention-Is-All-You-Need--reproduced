@@ -1,4 +1,5 @@
 from lit_model import transformerLightning
+from lit_model import checkpoint_callback
 from lit_data_module import DataModuleLightning
 from config import configuration
 from sweep_config import sweep_configuration
@@ -30,7 +31,7 @@ def train(config=None):
     model = transformerLightning(config)
 
     # Train model
-    trainer = L.Trainer(max_epochs=config.epochs)
+    trainer = L.Trainer(max_epochs=config.epochs, callbacks=[checkpoint_callback])
     trainer.fit(model=model, train_dataloaders=train_loader)
 
 wandb.agent(sweep_id, train, count=3)
