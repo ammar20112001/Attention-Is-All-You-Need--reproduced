@@ -14,9 +14,6 @@ config = configuration()
 # Callbacks
 checkpoint_callback = ModelCheckpoint(monitor='LOSS_VAL', mode='max')
 
-# W&B logger
-wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced", log_model="all", config=config)
-
 pad_token = torch.tensor(tokenizer('<pad>')['input_ids'][1:-1])
 loss_fn = torch.nn.CrossEntropyLoss(ignore_index=pad_token, label_smoothing=0.1)
 
@@ -36,6 +33,9 @@ class transformerLightning(L.LightningModule):
             dropout = self.config['dropout'],
             d_fc = self.config['d_fc']
         )
+
+        # W&B logger
+        self.wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced", log_model="all", config=config)
         
         # Log hyper-parameters
         # self.save_hyperparameters()
@@ -117,7 +117,7 @@ class transformerLightning(L.LightningModule):
         self.log("LOSS_VAL", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         if batch_idx==0:
             columns, data = transformerLightning.check_translation(encoder_input, decoder_input, logits, self.config['log_text_len'])
-            wandb_logger.log_text(key="samples", columns=columns, data=data)
+            self.wandb_logger.log_text(key="samples", columns=columns, data=data)
             # Append logits for histogram logging of logits
             self.logits.append(logits.cpu())
     
