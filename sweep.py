@@ -1,9 +1,10 @@
-from lit_model import transformerLightning, checkpoint_callback, wandb_logger
+from lit_model import transformerLightning, checkpoint_callback
 from lit_data_module import DataModuleLightning
 from config import configuration
 from sweep_config import sweep_configuration
 
 import lightning as L
+from lightning.pytorch.loggers import WandbLogger
 
 import wandb
 
@@ -19,6 +20,9 @@ def train(config=None):
         # if called by wandb agent, as below, 
         # this config will be set by Sweep Controller
         config = wandb.config
+
+        # Initialize WandB logger
+        wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced", log_model="all", config=config)
 
         # Create data instance
         dataset = DataModuleLightning(config)
