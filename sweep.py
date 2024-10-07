@@ -22,9 +22,6 @@ def train(config=None):
 
     # Create data instance
     dataset = DataModuleLightning(config)
-    # Create dataloader
-    dataset.setup(stage='fit')
-    train_loader = dataset.train_dataloader()
 
     # Create model instance
     model = transformerLightning(config)
@@ -33,6 +30,8 @@ def train(config=None):
     trainer = L.Trainer(max_epochs=config.epochs, 
                         callbacks=[checkpoint_callback], 
                         logger=wandb_logger)
-    trainer.fit(model=model, train_dataloaders=train_loader)
+    trainer.fit(model=model, 
+                datamodule=dataset,
+                )
 
 wandb.agent(sweep_id, train, count=3)
