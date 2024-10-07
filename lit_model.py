@@ -19,7 +19,7 @@ loss_fn = torch.nn.CrossEntropyLoss(ignore_index=pad_token, label_smoothing=0.1)
 
 class transformerLightning(L.LightningModule):
     
-    def __init__(self, config_arg=config):
+    def __init__(self, config_arg=config, logger=None):
         super().__init__()
         self.config = config_arg
         # Initialize transformer model
@@ -35,10 +35,7 @@ class transformerLightning(L.LightningModule):
         )
 
         # W&B logger
-        self.wandb_logger = WandbLogger(project="Attention-Is-All-You-Need--reproduced", log_model="all", config=config)
-        
-        # Log hyper-parameters
-        # self.save_hyperparameters()
+        self.wandb_logger = logger
         
         # W&B watch to log gradients and model topology
         # wandb_logger.watch(self.transformer, log="all", log_freq=250)
@@ -115,22 +112,23 @@ class transformerLightning(L.LightningModule):
 
         # Logging metrics and text
         self.log("LOSS_VAL", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        if batch_idx==0:
+        if batch_idx==0 and self.wandb_logger is not None:
             columns, data = transformerLightning.check_translation(encoder_input, decoder_input, logits, self.config['log_text_len'])
             self.wandb_logger.log_text(key="samples", columns=columns, data=data)
             # Append logits for histogram logging of logits
             self.logits.append(logits.cpu())
     
     def on_validation_epoch_end(self) -> None:
-        # Log histogram of logits
-        flattened_logits = torch.flatten(torch.cat(self.logits))
-        self.logger.experiment.log(
-            {
-                'valid/logits': wandb.Histogram(flattened_logits.to('cpu')),
-                'global_step': self.global_step
-            }
-        )
-        self.logits = [] # Reset logits for next validation run
+        if self.wandb_logger is not None:
+            # Log histogram of logits
+            flattened_logits = torch.flatten(torch.cat(self.logits))
+            self.logger.experiment.log(
+                {
+                    'valid/logits': wandb.Histogram(flattened_logits.to('cpu')),
+                    'global_step': self.global_step
+                }
+            )
+            self.logits = [] # Reset logits for next validation run
     
     def test_step(self):
         pass
