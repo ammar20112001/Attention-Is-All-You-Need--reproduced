@@ -42,7 +42,9 @@ def sweep_configuration():
             # Training configurations
             'epochs': {'value': 1},
             # Learning rate
-            'lr': {'value': 0.001},
+            'lr': {
+                'values': [0.001, 0.01, 0.1, 0.0001]
+                },
             'optimizer': {'value': 'Adam'}, # Hard coded
 
             # W&B configs
