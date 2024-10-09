@@ -12,76 +12,79 @@ import wandb
 config = configuration()
 
 # Callbacks
-checkpoint_callback = ModelCheckpoint(monitor='LOSS_VAL', mode='max')
+checkpoint_callback = ModelCheckpoint(monitor="LOSS_VAL", mode="max")
 
-pad_token = torch.tensor(tokenizer('<pad>')['input_ids'][1:-1])
+pad_token = torch.tensor(tokenizer("<pad>")["input_ids"][1:-1])
 loss_fn = torch.nn.CrossEntropyLoss(ignore_index=pad_token, label_smoothing=0.1)
 
+
 class transformerLightning(L.LightningModule):
-    
     def __init__(self, config_arg=config, logger=None):
         super().__init__()
         self.config = config_arg
         # Initialize transformer model
         self.transformer = build_transformer(
-            d_model = self.config['d_model'],
-            heads = self.config['heads'],
-            n_stack = self.config['n_stack'],
-            max_seq_len = self.config['max_seq_len'],
-            src_vocab_size = self.config['src_vocab_size'],
-            tgt_vocab_size = self.config['tgt_vocab_size'],
-            dropout = self.config['dropout'],
-            d_fc = self.config['d_fc']
+            d_model=self.config["d_model"],
+            heads=self.config["heads"],
+            n_stack=self.config["n_stack"],
+            max_seq_len=self.config["max_seq_len"],
+            src_vocab_size=self.config["src_vocab_size"],
+            tgt_vocab_size=self.config["tgt_vocab_size"],
+            dropout=self.config["dropout"],
+            d_fc=self.config["d_fc"],
         )
 
         # W&B logger
         self.wandb_logger = logger
-        
+
         # W&B watch to log gradients and model topology
         # wandb_logger.watch(self.transformer, log="all", log_freq=250)
 
         # Store logits for histograms
         self.logits = []
 
-
     @staticmethod
     def check_translation(encoder_input, decoder_input, labels, log_text_len):
         output = torch.argmax(labels, dim=-1)
         data = []
-        columns = ['Input', 'Target', 'Model output']
+        columns = ["Input", "Target", "Model output"]
 
-        #print('\n')
+        # print('\n')
         for i in range(log_text_len):
             data.append(
                 [
-                  tokenizer.decode(encoder_input[i], skip_special_tokens=True),
-                  tokenizer.decode(decoder_input[i], skip_special_tokens=True),
-                  tokenizer.decode(output[i], skip_special_tokens=True)
+                    tokenizer.decode(encoder_input[i], skip_special_tokens=True),
+                    tokenizer.decode(decoder_input[i], skip_special_tokens=True),
+                    tokenizer.decode(output[i], skip_special_tokens=True),
                 ]
             )
-        return  columns, data
+        return columns, data
 
     def training_step(self, batch, batch_idx):
         # Extracting required inputs
-        encoder_input = batch['encoder_input']
-        decoder_input = batch['decoder_input']
-        encoder_mask = batch['encoder_mask']
-        decoder_mask = batch['decoder_mask']
+        encoder_input = batch["encoder_input"]
+        decoder_input = batch["decoder_input"]
+        encoder_mask = batch["encoder_mask"]
+        decoder_mask = batch["decoder_mask"]
 
         # Encoding source text
-        encoder_output = self.transformer.encode(encoder_input, encoder_mask) # --> (B, S, d_model)
+        encoder_output = self.transformer.encode(
+            encoder_input, encoder_mask
+        )  # --> (B, S, d_model)
 
         # Decoding to target text
-        decoder_output = self.transformer.decode(decoder_input, encoder_output, encoder_mask, decoder_mask) # --> (B, S, d_model)
+        decoder_output = self.transformer.decode(
+            decoder_input, encoder_output, encoder_mask, decoder_mask
+        )  # --> (B, S, d_model)
 
         # Projecting from (B, S, d_model) to (B, S, V)
-        logits = self.transformer.project(decoder_output) # --> (B, S, V)
+        logits = self.transformer.project(decoder_output)  # --> (B, S, V)
 
         # Extracting labels for loss
-        labels = batch['labels'] # --> (B, S)
+        labels = batch["labels"]  # --> (B, S)
 
         # Calculating Loss
-        loss = loss_fn(logits.transpose(1,2), labels)
+        loss = loss_fn(logits.transpose(1, 2), labels)
 
         # Logging Metrics
         self.log("LOSS", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
@@ -90,46 +93,54 @@ class transformerLightning(L.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         # Extracting required inputs
-        encoder_input = batch['encoder_input']
-        decoder_input = batch['decoder_input']
-        encoder_mask = batch['encoder_mask']
-        decoder_mask = batch['decoder_mask']
+        encoder_input = batch["encoder_input"]
+        decoder_input = batch["decoder_input"]
+        encoder_mask = batch["encoder_mask"]
+        decoder_mask = batch["decoder_mask"]
 
         # Encoding source text
-        encoder_output = self.transformer.encode(encoder_input, encoder_mask) # --> (B, S, d_model)
+        encoder_output = self.transformer.encode(
+            encoder_input, encoder_mask
+        )  # --> (B, S, d_model)
 
         # Decoding to target text
-        decoder_output = self.transformer.decode(decoder_input, encoder_output, encoder_mask, decoder_mask) # --> (B, S, d_model)
+        decoder_output = self.transformer.decode(
+            decoder_input, encoder_output, encoder_mask, decoder_mask
+        )  # --> (B, S, d_model)
 
         # Projecting from (B, S, d_model) to (B, S, V)
-        logits = self.transformer.project(decoder_output) # --> (B, S, V)
+        logits = self.transformer.project(decoder_output)  # --> (B, S, V)
 
         # Extracting labels for loss
-        labels = batch['labels'] # --> (B, S)
+        labels = batch["labels"]  # --> (B, S)
 
         # Calculating Loss
-        loss = loss_fn(logits.transpose(1,2), labels)
+        loss = loss_fn(logits.transpose(1, 2), labels)
 
         # Logging metrics and text
-        self.log("LOSS_VAL", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        if batch_idx==0 and self.wandb_logger is not None:
-            columns, data = transformerLightning.check_translation(encoder_input, decoder_input, logits, self.config['log_text_len'])
+        self.log(
+            "LOSS_VAL", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True
+        )
+        if batch_idx == 0 and self.wandb_logger is not None:
+            columns, data = transformerLightning.check_translation(
+                encoder_input, decoder_input, logits, self.config["log_text_len"]
+            )
             self.wandb_logger.log_text(key="samples", columns=columns, data=data)
             # Append logits for histogram logging of logits
             self.logits.append(logits.cpu())
-    
+
     def on_validation_epoch_end(self) -> None:
         if self.wandb_logger is not None:
             # Log histogram of logits
             flattened_logits = torch.flatten(torch.cat(self.logits))
             self.logger.experiment.log(
                 {
-                    'valid/logits': wandb.Histogram(flattened_logits.to('cpu')),
-                    'global_step': self.global_step
+                    "valid/logits": wandb.Histogram(flattened_logits.to("cpu")),
+                    "global_step": self.global_step,
                 }
             )
-            self.logits = [] # Reset logits for next validation run
-    
+            self.logits = []  # Reset logits for next validation run
+
     def test_step(self):
         pass
 
@@ -137,10 +148,11 @@ class transformerLightning(L.LightningModule):
         pass
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
-        if config['optimizer'] == 'Adam':
-            return torch.optim.Adam(self.parameters(), lr=self.config['lr'])
-        elif config['optimizer'] == 'SGD':
-            return torch.optim.SGD(self.parameters(), lr=self.config['lr'])
+        if config["optimizer"] == "Adam":
+            return torch.optim.Adam(self.parameters(), lr=self.config["lr"])
+        elif config["optimizer"] == "SGD":
+            return torch.optim.SGD(self.parameters(), lr=self.config["lr"])
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     pass

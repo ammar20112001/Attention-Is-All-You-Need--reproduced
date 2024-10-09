@@ -1,6 +1,6 @@
 #  Attention Is All You Need | Transformer Model Reproduction and Experimentation Framework
 
-Welcome to the **Transformer Model Reproduction** repository! This project implements a flexible framework for experimenting with transformer architectures using **PyTorch** and **PyTorch Lightning**, along with **Weights and Biases (wandb)** for tracking and managing experiments. 
+Welcome to the **Transformer Model Reproduction** repository! This project implements a flexible framework for experimenting with transformer architectures using **PyTorch** and **PyTorch Lightning**, along with **Weights and Biases (wandb)** for tracking and managing experiments.
 
 ---
 
