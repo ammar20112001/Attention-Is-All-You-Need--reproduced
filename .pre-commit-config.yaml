@@ -21,3 +21,13 @@ repos:
     hooks:
       - id: black
     # additional configuration of black in pyproject.toml
+
+  # flake8 python linter with all the fixins
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        additional_dependencies: [
+          flake8-bandit, flake8-bugbear, flake8-docstrings,
+          flake8-import-order, darglint, mypy, pycodestyle, pydocstyle]
+    # additional configuration of flake8 and extensions in .flake8
