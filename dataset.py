@@ -78,7 +78,7 @@ class BilingualDataset(Dataset):
                 ds_tgt_tokens = sentence[i + 4 :]
                 break
 
-        if ds_src_tokens == None:
+        if ds_src_tokens is None:
             ds_src_tokens = sentence[: len(sentence) // 2]
             ds_tgt_tokens = sentence[len(ds_src_tokens) :]
 
@@ -170,7 +170,7 @@ class BilingualDataset(Dataset):
     @staticmethod
     def get_ds(config, tokenize=True):
         ds = load_dataset(config["dataset"])
-        if tokenize == True:
+        if tokenize:
             ds = ds.map(BilingualDataset.tokenize_text, batched=True)
         return ds
 

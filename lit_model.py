@@ -4,7 +4,6 @@ from config import configuration
 
 import torch
 import lightning as L
-from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import ModelCheckpoint
 
 import wandb
