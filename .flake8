@@ -6,18 +6,24 @@ max-complexity = 12
 max-line-length = 120
   # E501 - flake8 -- line length too long, actually handled by black
 extend-ignore =
-  # E W - flake8 PEP style check
-    E203,E402,E501,W503,  # whitespace, import, line length, binary operator line breaks
-  # S - flake8-bandit safety check
-    S101,S113,S311,S105,  # assert removed in bytecode, no request timeout, pRNG not secure, hardcoded password
-  # ANN - flake8-annotations type annotation check
-    ANN,ANN002,ANN003,ANN101,ANN102,ANN202,  # ignore all for now, but always ignore some
-  # D1 - flake8-docstrings docstring style check
-    D100,D102,D103,D104,D105,  # missing docstrings
-  # D2 D4 - flake8-docstrings docstring style check
-    D200,D205,D400,D401,  # whitespace issues and first line content
-  # DAR - flake8-darglint docstring correctness check
-    DAR103,  # mismatched or missing type in docstring
+    # E W - flake8 PEP style check
+    # whitespace, import, line length, binary operator line breaks
+    E203,E402,E501,W503,
+    # S - flake8-bandit safety check
+    # assert removed in bytecode, no request timeout, pRNG not secure, hardcoded password
+    S101,S113,S311,S105,
+    # ANN - flake8-annotations type annotation check
+    # ignore all for now, but always ignore some
+    ANN,ANN002,ANN003,ANN101,ANN102,ANN202,
+    # D1 - flake8-docstrings docstring style check
+    # missing docstrings
+    D100,D102,D103,D104,D105,
+    # D2 D4 - flake8-docstrings docstring style check
+    # whitespace issues and first line content
+    D200,D205,D400,D401,
+    # DAR - flake8-darglint docstring correctness check
+    # mismatched or missing type in docstring
+    DAR103,
 application-import-names = app_gradio,text_recognizer,tests,training
   # flake8-import-order: which names are first party?
 import-order-style = google
