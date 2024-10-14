@@ -2,6 +2,9 @@ import argparse
 
 import wandb
 
+# Local directtory to download model
+LOCAL_ARTIFACT_DIRECTORY = "prod/"
+
 # Stage a model that has been trained and stored as an artifcat on W&B
 
 
@@ -16,9 +19,9 @@ def main(args):
     api = wandb.Api()
     # Load model from W&B
     artifact = api.artifact(f"{args.entity}/{args.from_project}/{args.artifact}:latest")
-    print(artifact)
+    artifact.download(root=LOCAL_ARTIFACT_DIRECTORY)
 
-    # Convert to PyTorch model to torchscript for production environment
+    # Convert PyTorch model to torchscript for production environment
 
 
 def _setup_parser():
