@@ -1,17 +1,44 @@
+import argparse
+
+import wandb
+
 # Stage a model that has been trained and stored as an artifcat on W&B
 
-# Login W&B
-# Load model from W&B
-
-# Convert to PyTorch model to torchscript for production environment
 
 # Download model to production directory
 # Download model to W&B for other uses
 
 
-def main():
-    pass
+def main(args):
+
+    # Login W&B
+    wandb.login()
+    api = wandb.Api()
+    # Load model from W&B
+    artifact = api.artifact(f"{args.entity}/{args.from_project}/{args.artifact}:latest")
+    print(artifact)
+
+    # Convert to PyTorch model to torchscript for production environment
+
+
+def _setup_parser():
+    parser = argparse.ArgumentParser(
+        prog="Stage Model", description="Add necessary argument to stage a model"
+    )
+    parser.add_argument(
+        "--fetch",
+        action="store_true",
+        default=False,
+        help="True to stage model, and False otherwise",
+    )
+    parser.add_argument("--entity", type=str, default=None)
+    parser.add_argument("--from_project", type=str, default=None)
+    parser.add_argument("--artifact", type=str, default=None)
+
+    return parser
 
 
 if __name__ == "__main__":
-    main()
+    parser = _setup_parser()
+    args = parser.parse_args()
+    main(args)
