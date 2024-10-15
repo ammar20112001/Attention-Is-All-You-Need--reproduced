@@ -213,7 +213,7 @@ class transformerLightning(L.LightningModule):
             encoder_input = encoder_input.reshape((1, -1))
             decoder_input = decoder_input.reshape((1, -1))
 
-            print("decoder_input: ", decoder_input)
+            """print("decoder_input: ", decoder_input)
             print("encoder_input: ", encoder_input)
             print("encoder_mask: ", encoder_mask)
             print("decoder_mask: ", decoder_mask)
@@ -221,7 +221,7 @@ class transformerLightning(L.LightningModule):
             print("decoder_input: ", decoder_input.shape)
             print("encoder_input: ", encoder_input.shape)
             print("encoder_mask: ", encoder_mask.shape)
-            print("decoder_mask: ", decoder_mask.shape)
+            print("decoder_mask: ", decoder_mask.shape)"""
 
             # Decoding to target text
             decoder_output = self.transformer.decode(
@@ -240,8 +240,6 @@ class transformerLightning(L.LightningModule):
             dec_num_pad_tokens = (
                 config["dec_max_seq_len"] - len(ds_tgt_tokens) - 1
             )  # (-) <sos> in decoder input
-
-            print(ds_tgt_tokens)
 
             # Update decoder input
             decoder_input = torch.cat(
