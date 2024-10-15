@@ -148,7 +148,7 @@ class transformerLightning(L.LightningModule):
     def test_step(self):
         pass
 
-    def predict_step(self, x):
+    def predict(self, x):
 
         # Tokenize sentence
         ds_src_tokens = tokenizer(
@@ -157,7 +157,6 @@ class transformerLightning(L.LightningModule):
             truncation=True,
             max_length=config["dec_max_seq_len"],
         )["input_ids"]
-        print(ds_src_tokens)
         ds_tgt_tokens = []
 
         # Length of padding tokens in encoder and decoder inputs
