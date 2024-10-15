@@ -251,6 +251,9 @@ class transformerLightning(L.LightningModule):
 
         return decoder_input
 
+    def forward(self, x):
+        return x
+
     @staticmethod
     def causal_mask(size):
         mask = torch.triu(torch.ones((1, size, size)), diagonal=1).type(torch.int)
