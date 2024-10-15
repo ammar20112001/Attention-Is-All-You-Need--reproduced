@@ -232,9 +232,7 @@ class transformerLightning(L.LightningModule):
             logits = self.transformer.project(decoder_output)  # --> (B, S, V)
 
             # Find output token
-            output_token = torch.argmax(logits, dim=-1)[-1]  # --> (B, S)
-            print(output_token)
-            print(output_token.shape)
+            output_token = torch.argmax(logits, dim=-1).tolist()[0][0]  # --> (B, S)
             ds_tgt_tokens.append(output_token)
 
             # print('output_token: ', output_token)
