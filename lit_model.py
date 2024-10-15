@@ -201,6 +201,7 @@ class transformerLightning(L.LightningModule):
             encoder_input, encoder_mask
         )  # --> (B, S, d_model)
 
+        token_num = 0
         while len(ds_tgt_tokens) + 1 < config["dec_max_seq_len"]:
 
             # Create decoder mask
@@ -213,16 +214,6 @@ class transformerLightning(L.LightningModule):
             encoder_input = encoder_input.reshape((1, -1))
             decoder_input = decoder_input.reshape((1, -1))
 
-            """print("decoder_input: ", decoder_input)
-            print("encoder_input: ", encoder_input)
-            print("encoder_mask: ", encoder_mask)
-            print("decoder_mask: ", decoder_mask)
-
-            print("decoder_input: ", decoder_input.shape)
-            print("encoder_input: ", encoder_input.shape)
-            print("encoder_mask: ", encoder_mask.shape)
-            print("decoder_mask: ", decoder_mask.shape)"""
-
             # Decoding to target text
             decoder_output = self.transformer.decode(
                 decoder_input, encoder_output, encoder_mask, decoder_mask
@@ -232,10 +223,10 @@ class transformerLightning(L.LightningModule):
             logits = self.transformer.project(decoder_output)  # --> (B, S, V)
 
             # Find output token
-            output_token = torch.argmax(logits, dim=-1).tolist()[0][0]  # --> (B, S)
+            output_token = torch.argmax(logits, dim=-1).tolist()[0][
+                token_num
+            ]  # --> (B, S)
             ds_tgt_tokens.append(output_token)
-
-            # print('output_token: ', output_token)
 
             dec_num_pad_tokens = (
                 config["dec_max_seq_len"] - len(ds_tgt_tokens) - 1
@@ -257,9 +248,9 @@ class transformerLightning(L.LightningModule):
             if output_token == self.eos_token:
                 break
 
-        return decoder_input
+            token_num += 1
 
-        # decoded = tokenizer.decode(token_ids=decoder_output, skip_special_tokens=True)
+        return decoder_input
 
     @staticmethod
     def causal_mask(size):
