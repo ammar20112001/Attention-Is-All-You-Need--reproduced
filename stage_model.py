@@ -1,9 +1,15 @@
+import torch
+
+from dataset import tokenizer
+
+from lit_model import transformerLightning
+
 import argparse
 
 import wandb
 
-# Local directtory to download model
-LOCAL_ARTIFACT_DIRECTORY = "prod/"
+# Local directory to download model
+LOCAL_ARTIFACT_DIRECTORY = "prod/model/"
 
 # Stage a model that has been trained and stored as an artifcat on W&B
 
@@ -17,13 +23,21 @@ def main(args):
     # Login W&B
     wandb.login()
     api = wandb.Api()
-    # Load model from W&B
+
+    # Load and download model and metadata from W&B
+    run = api.run(f"{args.entity}/{args.from_project}/{args.artifact}")
+
     artifact = api.artifact(
-        f"{args.entity}/{args.from_project}/{args.artifact}:{args.version}"
+        f"{args.entity}/{args.from_project}/model-{args.artifact}:{args.version}"
     )
     artifact.download(root=LOCAL_ARTIFACT_DIRECTORY)
 
     # Convert PyTorch model to torchscript for production environment
+    model = transformerLightning(config_arg=run.config)
+    scripted_module = model.to_torchscript()
+
+    # Sace for use in production environment
+    torch.jit.save(scripted_module, f"{LOCAL_ARTIFACT_DIRECTORY}/model.pt")
 
 
 def _setup_parser():
@@ -40,6 +54,7 @@ def _setup_parser():
     parser.add_argument("--from_project", type=str, default=None)
     parser.add_argument("--artifact", type=str, default=None)
     parser.add_argument("--version", type=str, default="latest")
+    parser.add_argument("--sentence", type=str, default="english")
 
     return parser
 
@@ -50,3 +65,10 @@ if __name__ == "__main__":
 
     if args.fetch:
         main(args)
+
+    elif not args.fetch:
+        model = transformerLightning.load_from_checkpoint("prod/model.ckpt")
+        print("English:", args.sentence)
+        y_hat = model.predict(args.sentence)
+        decoded = tokenizer.decode(token_ids=y_hat, skip_special_tokens=True)
+        print("French: ", decoded)
