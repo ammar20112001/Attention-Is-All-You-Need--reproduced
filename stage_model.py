@@ -18,7 +18,9 @@ def main(args):
     wandb.login()
     api = wandb.Api()
     # Load model from W&B
-    artifact = api.artifact(f"{args.entity}/{args.from_project}/{args.artifact}:latest")
+    artifact = api.artifact(
+        f"{args.entity}/{args.from_project}/{args.artifact}:{args.version}"
+    )
     artifact.download(root=LOCAL_ARTIFACT_DIRECTORY)
 
     # Convert PyTorch model to torchscript for production environment
@@ -37,6 +39,7 @@ def _setup_parser():
     parser.add_argument("--entity", type=str, default=None)
     parser.add_argument("--from_project", type=str, default=None)
     parser.add_argument("--artifact", type=str, default=None)
+    parser.add_argument("--version", type=str, default="latest")
 
     return parser
 
@@ -44,4 +47,6 @@ def _setup_parser():
 if __name__ == "__main__":
     parser = _setup_parser()
     args = parser.parse_args()
-    main(args)
+
+    if args.fetch:
+        main(args)
