@@ -1,7 +1,5 @@
 import torch
 
-from dataset import tokenizer
-
 from lit_model import transformerLightning
 
 import argparse
@@ -54,7 +52,6 @@ def _setup_parser():
     parser.add_argument("--from_project", type=str, default=None)
     parser.add_argument("--artifact", type=str, default=None)
     parser.add_argument("--version", type=str, default="latest")
-    parser.add_argument("--sentence", type=str, default="english")
 
     return parser
 
@@ -65,10 +62,3 @@ if __name__ == "__main__":
 
     if args.fetch:
         main(args)
-
-    elif not args.fetch:
-        model = transformerLightning.load_from_checkpoint("prod/model.ckpt")
-        print("English:", args.sentence)
-        y_hat = model.predict(args.sentence)
-        decoded = tokenizer.decode(token_ids=y_hat, skip_special_tokens=True)
-        print("French: ", decoded)
