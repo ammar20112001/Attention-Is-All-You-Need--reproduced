@@ -42,6 +42,11 @@ class transformerLightning(L.LightningModule):
         # Store logits for histograms
         self.logits = []
 
+        # Create special tokens for predict data transformation
+        self.sos_token = torch.tensor(tokenizer("<sos>")["input_ids"][1:-1])
+        self.eos_token = torch.tensor(tokenizer("<eos>")["input_ids"][1:-1])
+        self.pad_token = torch.tensor(tokenizer("<pad>")["input_ids"][1:-1])
+
     @staticmethod
     def check_translation(encoder_input, decoder_input, labels, log_text_len):
         output = torch.argmax(labels, dim=-1)
@@ -143,8 +148,127 @@ class transformerLightning(L.LightningModule):
     def test_step(self):
         pass
 
-    def predict_step(self):
-        pass
+    def predict_step(self, x):
+
+        # Tokenize sentence
+        ds_src_tokens = tokenizer(
+            x,
+            add_special_tokens=False,
+            truncation=True,
+            max_length=config["dec_max_seq_len"],
+        )["input_ids"]
+        print(ds_src_tokens)
+        ds_tgt_tokens = []
+
+        # Length of padding tokens in encoder and decoder inputs
+        enc_num_pad_tokens = (
+            config["enc_max_seq_len"] - len(ds_src_tokens) - 2
+        )  # (-) <sos> and <eos>
+        dec_num_pad_tokens = (
+            config["dec_max_seq_len"] - len(ds_tgt_tokens) - 1
+        )  # (-) <sos> in decoder input
+
+        # Create encoder input
+        encoder_input = torch.cat(
+            [
+                self.sos_token,
+                torch.tensor(ds_src_tokens, dtype=torch.int64),
+                self.eos_token,
+                torch.tensor([self.pad_token] * enc_num_pad_tokens, dtype=torch.int64)
+                # <sos> ...sentence tokens... <eos> <pad>...
+            ],
+            dim=0,
+        )
+
+        # Create decoder input
+        decoder_input = torch.cat(
+            [
+                self.sos_token,
+                torch.tensor(ds_tgt_tokens, dtype=torch.int64),
+                torch.tensor([self.pad_token] * dec_num_pad_tokens, dtype=torch.int64)
+                # <sos> ...sentence tokens... <pad>...
+            ],
+            dim=0,
+        )
+
+        # Create encoder mask
+        encoder_mask = (
+            (encoder_input != self.pad_token).unsqueeze(0).unsqueeze(0).int()
+        )  # (1, 1, seq_len)
+
+        # Encoding source text
+        encoder_output = self.transformer.encode(
+            encoder_input, encoder_mask
+        )  # --> (B, S, d_model)
+
+        while len(ds_tgt_tokens) + 1 < config["dec_max_seq_len"]:
+
+            # Create decoder mask
+            decoder_mask = (decoder_input != self.pad_token).unsqueeze(
+                0
+            ).int() & transformerLightning.causal_mask(
+                decoder_input.size(0)
+            )  # (1, seq_len) & (1, seq_len, seq_len)
+
+            encoder_input = encoder_input.reshape((1, -1))
+            decoder_input = decoder_input.reshape((1, -1))
+
+            print("decoder_input: ", decoder_input)
+            print("encoder_input: ", encoder_input)
+            print("encoder_mask: ", encoder_mask)
+            print("decoder_mask: ", decoder_mask)
+
+            print("decoder_input: ", decoder_input.shape)
+            print("encoder_input: ", encoder_input.shape)
+            print("encoder_mask: ", encoder_mask.shape)
+            print("decoder_mask: ", decoder_mask.shape)
+
+            # Decoding to target text
+            decoder_output = self.transformer.decode(
+                decoder_input, encoder_output, encoder_mask, decoder_mask
+            )  # --> (B, S, d_model)
+
+            # Projecting from (B, S, d_model) to (B, S, V)
+            logits = self.transformer.project(decoder_output)  # --> (B, S, V)
+
+            # Find output token
+            output_token = torch.argmax(logits, dim=-1)[-1]  # --> (B, S)
+            print(output_token)
+            print(output_token.shape)
+            ds_tgt_tokens.append(output_token)
+
+            # print('output_token: ', output_token)
+
+            dec_num_pad_tokens = (
+                config["dec_max_seq_len"] - len(ds_tgt_tokens) - 1
+            )  # (-) <sos> in decoder input
+
+            print(ds_tgt_tokens)
+
+            # Update decoder input
+            decoder_input = torch.cat(
+                [
+                    self.sos_token,
+                    torch.tensor(ds_tgt_tokens, dtype=torch.int64),
+                    torch.tensor(
+                        [self.pad_token] * dec_num_pad_tokens, dtype=torch.int64
+                    )
+                    # <sos> ...sentence tokens... <pad>...
+                ],
+                dim=0,
+            )
+
+            if output_token == self.eos_token:
+                break
+
+        return decoder_input
+
+        # decoded = tokenizer.decode(token_ids=decoder_output, skip_special_tokens=True)
+
+    @staticmethod
+    def causal_mask(size):
+        mask = torch.triu(torch.ones((1, size, size)), diagonal=1).type(torch.int)
+        return mask == 0
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         if config["optimizer"] == "Adam":
