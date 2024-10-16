@@ -149,7 +149,6 @@ class transformerLightning(L.LightningModule):
         pass
 
     def forward(self, x):
-
         """print('running forward')
         if type(x) is int:
             # Tokenize sentence
@@ -166,10 +165,16 @@ class transformerLightning(L.LightningModule):
 
         # Length of padding tokens in encoder and decoder inputs
         enc_num_pad_tokens = (
-            config["enc_max_seq_len"] - len(ds_src_tokens) - 2
+            # self.config["enc_max_seq_len"] - len(ds_src_tokens) - 2
+            256
+            - len(ds_src_tokens)
+            - 2
         )  # (-) <sos> and <eos>
         dec_num_pad_tokens = (
-            config["dec_max_seq_len"] - len(ds_tgt_tokens) - 1
+            # self.config["dec_max_seq_len"] - len(ds_tgt_tokens) - 1
+            256
+            - len(ds_tgt_tokens)
+            - 1
         )  # (-) <sos> in decoder input
 
         # Create encoder input
@@ -206,14 +211,12 @@ class transformerLightning(L.LightningModule):
         )  # --> (B, S, d_model)
 
         token_num = 0
-        while len(ds_tgt_tokens) + 1 < config["dec_max_seq_len"]:
+        while len(ds_tgt_tokens) + 1 < 256:  # config["dec_max_seq_len"]:
 
             # Create decoder mask
             decoder_mask = (decoder_input != self.pad_token).unsqueeze(
                 0
-            ).int() & transformerLightning.causal_mask(
-                decoder_input.size(0)
-            )  # (1, seq_len) & (1, seq_len, seq_len)
+            ).int() & transformerLightning.causal_mask()  # (1, seq_len) & (1, seq_len, seq_len)
 
             encoder_input = encoder_input.reshape((1, -1))
             decoder_input = decoder_input.reshape((1, -1))
@@ -227,13 +230,16 @@ class transformerLightning(L.LightningModule):
             logits = self.transformer.project(decoder_output)  # --> (B, S, V)
 
             # Find output token
-            output_token = torch.argmax(logits, dim=-1).tolist()[0][
+            output_token = torch.argmax(logits, dim=-1)[0][
                 token_num
-            ]  # --> (B, S)
-            ds_tgt_tokens.append(output_token)
+            ].item()  # --> (B, S)
+            ds_tgt_tokens.append(torch.tensor(output_token, dtype=torch.int64))
 
             dec_num_pad_tokens = (
-                config["dec_max_seq_len"] - len(ds_tgt_tokens) - 1
+                # config["dec_max_seq_len"] - len(ds_tgt_tokens) - 1
+                256
+                - len(ds_tgt_tokens)
+                - 1
             )  # (-) <sos> in decoder input
 
             # Update decoder input
@@ -257,8 +263,8 @@ class transformerLightning(L.LightningModule):
         return decoder_input
 
     @staticmethod
-    def causal_mask(size):
-        mask = torch.triu(torch.ones((1, size, size)), diagonal=1).type(torch.int)
+    def causal_mask():
+        mask = torch.triu(torch.ones((1, 256, 256)), diagonal=1).type(torch.int)
         return mask == 0
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
