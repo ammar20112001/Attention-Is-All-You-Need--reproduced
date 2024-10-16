@@ -148,15 +148,20 @@ class transformerLightning(L.LightningModule):
     def test_step(self):
         pass
 
-    def predict(self, x):
+    def forward(self, x):
 
-        # Tokenize sentence
-        ds_src_tokens = tokenizer(
-            x,
-            add_special_tokens=False,
-            truncation=True,
-            max_length=config["dec_max_seq_len"],
-        )["input_ids"]
+        """print('running forward')
+        if type(x) is int:
+            # Tokenize sentence
+            ds_src_tokens = tokenizer(
+                x,
+                add_special_tokens=False,
+                truncation=True,
+                max_length=config["dec_max_seq_len"],
+            )["input_ids"]
+        else:"""
+        ds_src_tokens = x
+
         ds_tgt_tokens = []
 
         # Length of padding tokens in encoder and decoder inputs
@@ -250,9 +255,6 @@ class transformerLightning(L.LightningModule):
             token_num += 1
 
         return decoder_input
-
-    def forward(self, x):
-        return x
 
     @staticmethod
     def causal_mask(size):
