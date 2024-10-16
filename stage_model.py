@@ -7,7 +7,8 @@ import argparse
 import wandb
 
 # Local directory to download model
-LOCAL_ARTIFACT_DIRECTORY = "prod/model/"
+LOCAL_MODEL_DIRECTORY = "models"
+LOCAL_PROD_MODEL_DIRECTORY = "prod/models"
 
 # Stage a model that has been trained and stored as an artifcat on W&B
 
@@ -21,21 +22,28 @@ def main(args):
     # Login W&B
     wandb.login()
     api = wandb.Api()
-
-    # Load and download model and metadata from W&B
+    # Get api run
     run = api.run(f"{args.entity}/{args.from_project}/{args.artifact}")
 
+    # Load model artifact
     artifact = api.artifact(
         f"{args.entity}/{args.from_project}/model-{args.artifact}:{args.version}"
     )
-    artifact.download(root=LOCAL_ARTIFACT_DIRECTORY)
+    # Downlaod model artifact
+    artifact.download(root=LOCAL_MODEL_DIRECTORY)
 
-    # Convert PyTorch model to torchscript for production environment
-    model = transformerLightning(config_arg=run.config)
+    # Convert PyTorch model to TorchScript for production environment
+    model = transformerLightning.load_from_checkpoint(
+        f"{LOCAL_MODEL_DIRECTORY}/model.ckpt"
+    )
     scripted_module = model.to_torchscript()
 
-    # Sace for use in production environment
-    torch.jit.save(scripted_module, f"{LOCAL_ARTIFACT_DIRECTORY}/model.pt")
+    # Save for use in production environment
+    torch.jit.save(
+        scripted_module, f"{LOCAL_PROD_MODEL_DIRECTORY}/model-{args.artifact}.pt"
+    )
+    # Also save TorchScript version to W&B for other accesses
+    run.upload_file(f"{LOCAL_PROD_MODEL_DIRECTORY}/model-{args.artifact}.pt")
 
 
 def _setup_parser():
