@@ -160,7 +160,7 @@ class transformerLightning(L.LightningModule):
             )["input_ids"]
         else:"""
         ds_src_tokens = x
-
+        print(x)
         ds_tgt_tokens = []
 
         # Length of padding tokens in encoder and decoder inputs
@@ -181,9 +181,9 @@ class transformerLightning(L.LightningModule):
         encoder_input = torch.cat(
             [
                 self.sos_token,
-                torch.tensor(ds_src_tokens, dtype=torch.int64),
+                ds_src_tokens,
                 self.eos_token,
-                torch.tensor([self.pad_token] * enc_num_pad_tokens, dtype=torch.int64)
+                self.pad_token * enc_num_pad_tokens
                 # <sos> ...sentence tokens... <eos> <pad>...
             ],
             dim=0,
@@ -194,7 +194,7 @@ class transformerLightning(L.LightningModule):
             [
                 self.sos_token,
                 torch.tensor(ds_tgt_tokens, dtype=torch.int64),
-                torch.tensor([self.pad_token] * dec_num_pad_tokens, dtype=torch.int64)
+                self.pad_token * dec_num_pad_tokens
                 # <sos> ...sentence tokens... <pad>...
             ],
             dim=0,
@@ -247,9 +247,7 @@ class transformerLightning(L.LightningModule):
                 [
                     self.sos_token,
                     torch.tensor(ds_tgt_tokens, dtype=torch.int64),
-                    torch.tensor(
-                        [self.pad_token] * dec_num_pad_tokens, dtype=torch.int64
-                    )
+                    self.pad_token * dec_num_pad_tokens,
                     # <sos> ...sentence tokens... <pad>...
                 ],
                 dim=0,
