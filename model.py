@@ -237,7 +237,7 @@ class EncoderBlock(nn.Module):
 
     def forward(self, x, src_mask):
         x = self.residual_connection_block[0](
-            x, lambda x: self.multi_head_attention_block(x, x, x, src_mask)
+            x, DecoderBlock.apply_multi_head_attention_block(src_mask)
         )
         x = self.residual_connection_block[1](x, self.feed_forward_block)
         return x
@@ -263,16 +263,28 @@ class DecoderBlock(nn.Module):
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
         x = self.residual_connection_block[0](
-            x, lambda x: self.multi_head_attention_block(x, x, x, tgt_mask)
+            x, self.apply_multi_head_attention_block(tgt_mask)
         )
         x = self.residual_connection_block[1](
-            x,
-            lambda x: self.cross_attention_block(
-                x, encoder_output, encoder_output, src_mask
-            ),
+            x, self.apply_cross_head_attention_block(encoder_output, src_mask)
         )
         x = self.residual_connection_block[2](x, self.feed_forward_block)
         return x
+
+    def apply_multi_head_attention_block(self, mask):
+        def func(x):
+            mask_ = mask
+            return self.multi_head_attention_block(x, x, x, mask_)
+
+        return func
+
+    def apply_cross_head_attention_block(self, encoder_output, mask):
+        def func(x):
+            encoder_output_ = encoder_output
+            mask_ = mask
+            self.multi_head_attention_block(x, encoder_output_, encoder_output_, mask_)
+
+        return func
 
 
 class Encoder(nn.Module):
