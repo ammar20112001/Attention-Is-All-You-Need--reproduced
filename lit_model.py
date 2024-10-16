@@ -11,7 +11,7 @@ import wandb
 config = configuration()
 
 # Callbacks
-checkpoint_callback = ModelCheckpoint(monitor="LOSS_VAL", mode="max")
+checkpoint_callback = ModelCheckpoint(monitor="LOSS_VAL", mode="min")
 
 pad_token = torch.tensor(tokenizer("<pad>")["input_ids"][1:-1])
 loss_fn = torch.nn.CrossEntropyLoss(ignore_index=pad_token, label_smoothing=0.1)
