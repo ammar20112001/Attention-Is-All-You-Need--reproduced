@@ -149,19 +149,7 @@ class transformerLightning(L.LightningModule):
         pass
 
     def forward(self, x):
-        """print('running forward')
-        if type(x) is int:
-            # Tokenize sentence
-            ds_src_tokens = tokenizer(
-                x,
-                add_special_tokens=False,
-                truncation=True,
-                max_length=config["dec_max_seq_len"],
-            )["input_ids"]
-        else:"""
         ds_src_tokens = x
-        print("ds_src_tokens:", x)
-        ds_tgt_tokens = []
         output = self.sos_token
 
         # Length of padding tokens in encoder and decoder inputs
@@ -172,10 +160,9 @@ class transformerLightning(L.LightningModule):
             - 2
         )  # (-) <sos> and <eos>
         dec_num_pad_tokens = (
-            # self.config["dec_max_seq_len"] - len(ds_tgt_tokens) - 1
+            # self.config["dec_max_seq_len"] - len(output) - 1
             256
-            - len(ds_tgt_tokens)
-            - 1
+            - len(output)
         )  # (-) <sos> in decoder input
 
         # Create encoder input
@@ -211,7 +198,7 @@ class transformerLightning(L.LightningModule):
         )  # --> (B, S, d_model)
 
         token_num = 0
-        while len(ds_tgt_tokens) + 1 < 256:  # config["dec_max_seq_len"]:
+        while len(output) < 256:  # config["dec_max_seq_len"]:
 
             # Create decoder mask
             decoder_mask = (decoder_input != self.pad_token).unsqueeze(
@@ -233,27 +220,22 @@ class transformerLightning(L.LightningModule):
             output_token = torch.argmax(logits, dim=-1)[0][
                 token_num
             ].item()  # --> (B, S)
-            # ds_tgt_tokens = torch.cat([ds_tgt_tokens, torch.tensor([output_token], dtype=torch.int64)])
 
             dec_num_pad_tokens = (
-                # config["dec_max_seq_len"] - len(ds_tgt_tokens) - 1
+                # config["dec_max_seq_len"] - len(output) - 1
                 256
                 - len(output)
                 - 1
             )  # (-) <sos> in decoder input
 
             output_token = torch.tensor(output_token, dtype=torch.int64)
-            print(output_token)
             output = torch.cat([output, output_token.unsqueeze(0)])
-            print(output)
 
             # Update decoder input
             decoder_input = torch.cat(
                 [output, self.pad_token.repeat(dec_num_pad_tokens)],
                 dim=0,
             )
-
-            # print(decoder_input)
 
             if output_token == self.eos_token:
                 break
