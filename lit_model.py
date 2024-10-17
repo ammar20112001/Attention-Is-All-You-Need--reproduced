@@ -183,7 +183,7 @@ class transformerLightning(L.LightningModule):
                 self.sos_token,
                 ds_src_tokens,
                 self.eos_token,
-                torch.tensor([self.pad_token] * enc_num_pad_tokens, dtype=torch.int64)
+                self.pad_token.repeat(enc_num_pad_tokens)
                 # <sos> ...sentence tokens... <eos> <pad>...
             ],
             dim=0,
@@ -193,8 +193,7 @@ class transformerLightning(L.LightningModule):
         decoder_input = torch.cat(
             [
                 self.sos_token,
-                torch.tensor(ds_tgt_tokens, dtype=torch.int64),
-                torch.tensor([self.pad_token] * dec_num_pad_tokens, dtype=torch.int64)
+                self.pad_token.repeat(dec_num_pad_tokens)
                 # <sos> ...sentence tokens... <pad>...
             ],
             dim=0,
@@ -242,16 +241,17 @@ class transformerLightning(L.LightningModule):
                 - 1
             )  # (-) <sos> in decoder input
 
+            decoder_input_list = [self.sos_token]
+            decoder_input_list[len(decoder_input_list) :] = torch.tensor(
+                [ds_tgt_tokens], dtype=torch.int64
+            )
+            decoder_input_list[len(decoder_input_list) :] = [
+                self.pad_token.repeat(dec_num_pad_tokens)
+            ]
+
             # Update decoder input
             decoder_input = torch.cat(
-                [
-                    self.sos_token,
-                    torch.tensor(ds_tgt_tokens, dtype=torch.int64),
-                    torch.tensor(
-                        [self.pad_token] * dec_num_pad_tokens, dtype=torch.int64
-                    )
-                    # <sos> ...sentence tokens... <pad>...
-                ],
+                decoder_input_list,
                 dim=0,
             )
 
