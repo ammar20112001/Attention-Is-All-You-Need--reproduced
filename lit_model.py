@@ -162,6 +162,7 @@ class transformerLightning(L.LightningModule):
         ds_src_tokens = x
         print("ds_src_tokens:", x)
         ds_tgt_tokens = []
+        output = self.sos_token
 
         # Length of padding tokens in encoder and decoder inputs
         enc_num_pad_tokens = (
@@ -232,28 +233,27 @@ class transformerLightning(L.LightningModule):
             output_token = torch.argmax(logits, dim=-1)[0][
                 token_num
             ].item()  # --> (B, S)
-            ds_tgt_tokens.append(torch.tensor(output_token, dtype=torch.int64))
+            # ds_tgt_tokens = torch.cat([ds_tgt_tokens, torch.tensor([output_token], dtype=torch.int64)])
 
             dec_num_pad_tokens = (
                 # config["dec_max_seq_len"] - len(ds_tgt_tokens) - 1
                 256
-                - len(ds_tgt_tokens)
+                - len(output)
                 - 1
             )  # (-) <sos> in decoder input
 
-            decoder_input_list = [self.sos_token]
-            decoder_input_list[len(decoder_input_list) :] = torch.tensor(
-                [ds_tgt_tokens], dtype=torch.int64
-            )
-            decoder_input_list[len(decoder_input_list) :] = [
-                self.pad_token.repeat(dec_num_pad_tokens)
-            ]
+            output_token = torch.tensor(output_token, dtype=torch.int64)
+            print(output_token)
+            output = torch.cat([output, output_token.unsqueeze(0)])
+            print(output)
 
             # Update decoder input
             decoder_input = torch.cat(
-                decoder_input_list,
+                [output, self.pad_token.repeat(dec_num_pad_tokens)],
                 dim=0,
             )
+
+            # print(decoder_input)
 
             if output_token == self.eos_token:
                 break
