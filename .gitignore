@@ -5,3 +5,5 @@ __pycache__
 /env
 bootstrap.py
 wandb/
+prod/models/
+models/
