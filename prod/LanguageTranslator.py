@@ -11,9 +11,10 @@ from transformers import AutoTokenizer
 PROD_MODEL_DIRECTORY = "prod/models"
 MODEL_NAME = "model.pt"
 
+
 class LanguageTranslator:
     def __init__(self, path: str = None):
-        
+
         # TorchScript model path
         if not path:
             self.model_path = PROD_MODEL_DIRECTORY + "/" + MODEL_NAME
@@ -21,7 +22,7 @@ class LanguageTranslator:
             self.model_path = path
 
         self.model = torch.jit.load(self.model_path)
-        
+
         # Initializing tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
         special_tokens_dict = {
@@ -47,10 +48,10 @@ class LanguageTranslator:
 
         # Predict tokens
         y = self.model(x)
-        
+
         # return decoded tokens
         return self.tokenizer.decode(token_ids=y, skip_special_tokens=True)
-    
+
 
 def _setup_parser():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -60,7 +61,7 @@ def _setup_parser():
         type=str,
         help="English sentence that will be translated to French",
     )
-    
+
     parser.add_argument(
         "-f",
         "--filename",
