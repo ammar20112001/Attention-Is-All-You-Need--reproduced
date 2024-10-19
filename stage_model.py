@@ -39,11 +39,9 @@ def main(args):
     scripted_module = model.to_torchscript()
 
     # Save for use in production environment
-    torch.jit.save(
-        scripted_module, f"{LOCAL_PROD_MODEL_DIRECTORY}/model-{args.artifact}.pt"
-    )
+    torch.jit.save(scripted_module, f"{LOCAL_PROD_MODEL_DIRECTORY}/model.pt")
     # Also save TorchScript version to W&B for other accesses
-    run.upload_file(f"{LOCAL_PROD_MODEL_DIRECTORY}/model-{args.artifact}.pt")
+    run.upload_file(f"{LOCAL_PROD_MODEL_DIRECTORY}/model.pt")
 
 
 def _setup_parser():
@@ -99,7 +97,7 @@ if __name__ == "__main__":
         print("Using TorchScript model.pt...")
         from dataset import tokenizer
 
-        model = torch.jit.load(f"prod/models/model-{args.artifact}.pt")
+        model = torch.jit.load("prod/models/model.pt")
 
         sentence = torch.tensor(
             tokenizer(
