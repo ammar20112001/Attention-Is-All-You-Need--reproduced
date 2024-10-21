@@ -15,8 +15,7 @@ def home():
     if request.method=="POST":
         x = request.form.get("englishSentence")
         y = model.predict(x)
-        print(y)
 
-        return render_template("page.html")
+        return render_template("page.html", english=x, french=y)
 
     return render_template('page.html')
