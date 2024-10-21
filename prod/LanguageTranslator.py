@@ -8,7 +8,7 @@ import torch
 from transformers import AutoTokenizer
 
 
-PROD_MODEL_DIRECTORY = "prod/models"
+PROD_MODEL_DIRECTORY = "models"
 MODEL_NAME = "model.pt"
 
 
