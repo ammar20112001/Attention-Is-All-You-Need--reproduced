@@ -15,12 +15,12 @@ except Exception as e:
 s3 = boto3.client('s3')
 
 
-def download_model(bucket, object):
-    model_dir = f"/tmp/{os.path.basename(object)}"
+def download_model(bucket, key):
+    model_dir = f"/tmp/{os.path.basename(key)}"
 
     if not os.path.exists(model_dir):
         # Download model from s3 to temp dir
-        s3.download_file(bucket, object, model_dir)
+        s3.Bucket(bucket).download_file(key, model_dir)
     
     return model_dir
 
@@ -34,8 +34,8 @@ def lambda_handler(event, context):
 
     # Downloads model from s3 bucket and return path
     model_dir = download_model(
-        bucket='',
-        object=''
+        bucket='translator-model-bucket',
+        key='model.pt'
         )
     
     # Load model
