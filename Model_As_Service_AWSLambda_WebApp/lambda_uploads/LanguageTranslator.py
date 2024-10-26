@@ -8,7 +8,7 @@ import torch
 from transformers import AutoTokenizer
 
 
-PROD_MODEL_DIRECTORY = "models"
+MODEL_DIRECTORY = "../../Models"
 MODEL_NAME = "model.pt"
 
 
@@ -17,7 +17,7 @@ class LanguageTranslator:
 
         # TorchScript model path
         if not path:
-            self.model_path = PROD_MODEL_DIRECTORY + "/" + MODEL_NAME
+            self.model_path = MODEL_DIRECTORY + "/" + MODEL_NAME
         else:
             self.model_path = path
 
