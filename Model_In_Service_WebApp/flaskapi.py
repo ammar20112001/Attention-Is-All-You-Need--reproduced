@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template
 
-from prod.LanguageTranslator import LanguageTranslator
+from Model_In_Service_WebApp.LanguageTranslator import LanguageTranslator
 
 
 model = LanguageTranslator()
