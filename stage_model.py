@@ -1,3 +1,5 @@
+import os
+
 import torch
 
 from lit_model import transformerLightning
@@ -23,6 +25,9 @@ def main(args):
     api = wandb.Api()
     # Get api run
     run = api.run(f"{args.entity}/{args.from_project}/{args.artifact}")
+
+    if not os.path.exists(MODEL_DIRECTORY):
+        os.mkdir(MODEL_DIRECTORY)
 
     # Load model artifact
     artifact = api.artifact(
