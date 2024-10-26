@@ -1,4 +1,6 @@
 import os
+import sys
+import zipfile
 
 import boto3
 
@@ -6,13 +8,24 @@ import json
 
 from LanguageTranslator import LanguageTranslator
 
-try:
-    import unzip_torch
-except Exception as e:
-    print("Failed at unzip_torch", e, sep="\n")
-
 
 s3 = boto3.client("s3")
+
+
+def load_torch(bucket, key):
+
+    torch_dir = "/tmp/torch"
+
+    if not os.path.exists(torch_dir):
+        # Download model from s3 to temp dir
+        s3.Bucket(bucket).download_file(key, f"{torch_dir}.zip")
+        # Unzip Torch dependency to /tmp/ directory
+        zipfile.ZipFile(torch_dir, "r").extractall("./")
+        # Delete zipped torch file
+        os.remove(f"{torch_dir}.zip")
+
+    # Add /tmp/torch to environment
+    sys.path.append(torch_dir)
 
 
 def download_model(bucket, key):
@@ -31,6 +44,9 @@ def load_model(model_dir):
 
 def lambda_handler(event, context):
     x = json.loads(event["body"])["englishSentence"]
+
+    # Load torch in /tmp/
+    load_torch(bucket="translator-model-bucket", key="torch.zip")
 
     # Downloads model from s3 bucket and return path
     model_dir = download_model(bucket="translator-model-bucket", key="model.pt")
