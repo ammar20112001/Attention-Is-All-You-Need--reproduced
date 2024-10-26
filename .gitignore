@@ -9,3 +9,4 @@ prod/models/
 models/
 Models/
 *.zip
+dependencies*
