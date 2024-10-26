@@ -7,8 +7,7 @@ import argparse
 import wandb
 
 # Local directory to download model
-LOCAL_MODEL_DIRECTORY = "models"
-LOCAL_PROD_MODEL_DIRECTORY = "prod/models"
+MODEL_DIRECTORY = "Models"
 
 # Stage a model that has been trained and stored as an artifcat on W&B
 
@@ -30,18 +29,16 @@ def main(args):
         f"{args.entity}/{args.from_project}/model-{args.artifact}:{args.version}"
     )
     # Downlaod model artifact
-    artifact.download(root=LOCAL_MODEL_DIRECTORY)
+    artifact.download(root=MODEL_DIRECTORY)
 
     # Convert PyTorch model to TorchScript for production environment
-    model = transformerLightning.load_from_checkpoint(
-        f"{LOCAL_MODEL_DIRECTORY}/model.ckpt"
-    )
+    model = transformerLightning.load_from_checkpoint(f"{MODEL_DIRECTORY}/model.ckpt")
     scripted_module = model.to_torchscript()
 
     # Save for use in production environment
-    torch.jit.save(scripted_module, f"{LOCAL_PROD_MODEL_DIRECTORY}/model.pt")
+    torch.jit.save(scripted_module, f"{MODEL_DIRECTORY}/model.pt")
     # Also save TorchScript version to W&B for other accesses
-    run.upload_file(f"{LOCAL_PROD_MODEL_DIRECTORY}/model.pt")
+    run.upload_file(f"{MODEL_DIRECTORY}/model.pt")
 
 
 def _setup_parser():
