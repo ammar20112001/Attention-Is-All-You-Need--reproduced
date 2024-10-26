@@ -6,6 +6,9 @@ cp -r .venv/lib64/python3.12/site-packages/* packages
 
 cd packages
 
+# Manual Removes
+rm -r transformers/models
+
 # Remove unnecessary dependencies for production
 find . -type d -name "tests" -exec rm -rf {} +
 find . -type d -name "__pycache__" -exec rm -rf {} +
@@ -25,7 +28,10 @@ rm -r packages
 # Zip all code, adding dependencies zipped content within
 cd Code
 zip -ru ../dependencies.zip .
+cd ..
 
 # Upload zipped file to s3 bucket
+aws s3 cp dependencies.zip s3://translator-model-bucket/
 
 # Upload to aws lambda from s3 bucket
+aws lambda update-function-code --function-name arn:aws:lambda:eu-north-1:257394486576:function:TranformersTranslator --s3-bucket translator-model-bucket --s3-key dependencies.zip
