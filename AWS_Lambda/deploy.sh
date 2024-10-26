@@ -17,7 +17,7 @@ rm -rf ./{*.egg-info,*.dist-info}
 find . -name \*.pyc -delete
 
 # Zip and delete torch
-zip -r9 torch.zip torch
+zip -r9 ${OLDPWD}/torch.zip torch
 rm -r torch
 
 # Zip and delete all other dependencies
@@ -32,6 +32,7 @@ cd ..
 
 # Upload zipped file to s3 bucket
 aws s3 cp dependencies.zip s3://translator-model-bucket/
+aws s3 cp torch.zip s3://translator-model-bucket/
 
 # Upload to aws lambda from s3 bucket
 aws lambda update-function-code --function-name arn:aws:lambda:eu-north-1:257394486576:function:TranformersTranslator --s3-bucket translator-model-bucket --s3-key dependencies.zip
