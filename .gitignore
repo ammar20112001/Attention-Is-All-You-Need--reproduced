@@ -7,4 +7,5 @@ bootstrap.py
 wandb/
 prod/models/
 models/
+Models/
 *.zip
