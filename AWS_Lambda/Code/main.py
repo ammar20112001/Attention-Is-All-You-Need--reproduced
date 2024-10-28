@@ -7,6 +7,8 @@ import boto3
 import json
 
 
+os.environ["HF_HOME"] = "/tmp"
+
 s3 = boto3.resource("s3")
 
 
@@ -58,6 +60,6 @@ def lambda_handler(event, context):
     model = load_model(model_dir)
 
     # Make prediction
-    y = model(x)
+    y = model.predict(x)
 
     return {"statusCode": 200, "prediction": y}
