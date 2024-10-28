@@ -52,4 +52,4 @@ if __name__ == "__main__":
     print(response.text)
 
     r = json.loads(response.text)
-    print(r["data"])
+    print(r["prediction"])
