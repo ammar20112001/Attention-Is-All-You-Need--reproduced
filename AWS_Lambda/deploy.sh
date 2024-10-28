@@ -3,17 +3,21 @@
 # Create a packages folder and copy everything from .venv
 mkdir packages
 cp -r .venv/lib64/python3.12/site-packages/* packages
-
 cd packages
 
 # Manual Removes
-rm -r transformers/models
+mkdir transformers/models_temp
+cp -r transformers/models/auto transformers/models_temp
+cp -r transformers/models/encoder_decoder transformers/models_temp
+cp -r transformers/models/bert transformers/models_temp
+rm -r transformers/models/
+mv transformers/models_temp transformers/models
 
 # Remove unnecessary dependencies for production
 find . -type d -name "tests" -exec rm -rf {} +
 find . -type d -name "__pycache__" -exec rm -rf {} +
 rm -rf ./{caffe2,wheel,wheel-*,pkg_resources,boto*,aws*,pip,pip-*,pipenv,setuptools}
-rm -rf ./{*.egg-info,*.dist-info}
+#rm -rf ./{*.egg-info,*.dist-info}
 find . -name \*.pyc -delete
 
 # Zip and delete torch
