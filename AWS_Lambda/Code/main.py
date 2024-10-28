@@ -41,6 +41,7 @@ def download_model(bucket, key):
 
 def load_model(model_dir):
     from LanguageTranslator import LanguageTranslator
+
     return LanguageTranslator(path=model_dir)
 
 
