@@ -30,8 +30,9 @@ def home():
 
     return render_template("page.html")
 
+
 if __name__ == "__main__":
-        
+
     x = "hi"
 
     # POST request to aws lambda
@@ -46,7 +47,7 @@ if __name__ == "__main__":
         lambda_url, data=payload, headers=headers
     )
     print(response.status_code)
-    print(response.headers['content-type'])
+    print(response.headers["content-type"])
     print(response.json)
     print(response.text)
 
