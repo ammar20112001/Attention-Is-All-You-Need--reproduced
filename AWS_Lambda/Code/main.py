@@ -6,10 +6,8 @@ import boto3
 
 import json
 
-from LanguageTranslator import LanguageTranslator
 
-
-s3 = boto3.client("s3")
+s3 = boto3.resource("s3")
 
 
 def load_torch(bucket, key):
@@ -42,6 +40,7 @@ def download_model(bucket, key):
 
 
 def load_model(model_dir):
+    from LanguageTranslator import LanguageTranslator
     return LanguageTranslator(path=model_dir)
 
 
