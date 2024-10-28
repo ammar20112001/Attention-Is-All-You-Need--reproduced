@@ -6,9 +6,6 @@ cp -r .venv/lib64/python3.12/site-packages/* packages
 
 cd packages
 
-# Manual Removes
-rm -r transformers/models
-
 # Remove unnecessary dependencies for production
 find . -type d -name "tests" -exec rm -rf {} +
 find . -type d -name "__pycache__" -exec rm -rf {} +
