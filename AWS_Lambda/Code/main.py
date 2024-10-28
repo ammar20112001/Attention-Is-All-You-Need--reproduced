@@ -4,8 +4,6 @@ import zipfile
 
 import boto3
 
-import json
-
 
 os.environ["HF_HOME"] = "/tmp"
 
@@ -27,8 +25,8 @@ def load_torch(bucket, key):
         os.remove("/tmp/torch.zip")
 
     # Add /tmp/torch to environment
-    sys.path.append(f"/var/task/tmp/")
-    sys.path.append(f"/tmp/")
+    sys.path.append("/var/task/tmp/")
+    sys.path.append("/tmp/")
 
 
 def download_model(bucket, key):
