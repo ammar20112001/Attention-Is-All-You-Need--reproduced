@@ -2,6 +2,8 @@ import os
 import sys
 import zipfile
 
+import json
+
 import boto3
 
 
@@ -46,7 +48,8 @@ def load_model(model_dir):
 
 
 def lambda_handler(event, context):
-    x = event["englishSentence"]
+    body = json.loads(event["body"])
+    x = body.get("englishSentence")
 
     # Load torch in /tmp/
     load_torch(bucket="translator-model-bucket", key="torch.zip")
@@ -60,4 +63,8 @@ def lambda_handler(event, context):
     # Make prediction
     y = model.predict(x)
 
-    return {"statusCode": 200, "prediction": y}
+    return {
+        "statusCode": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": json.dumps({"message": "Data received successfully!", "data": y}),
+    }
