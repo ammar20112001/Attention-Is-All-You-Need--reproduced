@@ -14,18 +14,21 @@ s3 = boto3.client("s3")
 
 def load_torch(bucket, key):
 
-    torch_dir = "/tmp/torch"
+    torch_dir = "/tmp/torch/"
 
     if not os.path.exists(torch_dir):
         # Download model from s3 to temp dir
-        s3.Bucket(bucket).download_file(key, f"{torch_dir}.zip")
+        s3.Bucket(bucket).download_file(key, "/tmp/torch.zip")
         # Unzip Torch dependency to /tmp/ directory
-        zipfile.ZipFile(torch_dir, "r").extractall("./")
+        zipfile.ZipFile("/tmp/torch.zip", "r").extractall("/tmp/")
         # Delete zipped torch file
-        os.remove(f"{torch_dir}.zip")
+
+    if os.path.exists("/tmp/torch.zip"):
+        os.remove("/tmp/torch.zip")
 
     # Add /tmp/torch to environment
-    sys.path.append(torch_dir)
+    sys.path.append(f"/var/task/tmp/")
+    sys.path.append(f"/tmp/")
 
 
 def download_model(bucket, key):
@@ -43,7 +46,7 @@ def load_model(model_dir):
 
 
 def lambda_handler(event, context):
-    x = json.loads(event["body"])["englishSentence"]
+    x = event["englishSentence"]
 
     # Load torch in /tmp/
     load_torch(bucket="translator-model-bucket", key="torch.zip")
