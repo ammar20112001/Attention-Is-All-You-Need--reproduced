@@ -68,8 +68,8 @@ These components are implemented using **plain PyTorch** for a hands-on understa
 To get started, clone the repository and install the necessary dependencies:
 
 ```bash
-git clone https://github.com/yourusername/transformer-reproduction.git
-cd transformer-reproduction
+git clone https://github.com/ammar20112001/Attention-Is-All-You-Need--reproduced.git
+cd Attention-Is-All-You-Need--reproduced
 
 # Install dependencies
 pip install -r requirements.txt
