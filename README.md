@@ -6,7 +6,7 @@ To access model directly and interact with it, visit the following link:
 [Visit the Hugging Face Spaces App](https://huggingface.co/spaces/ammar-20112001/Attention-Is-All-You-Need-reproduced)
 
 **Important Notes:**
-1. Since we are using AWS services Lambda and S3, please be kind and use it only for testing purposes. Avoid making too many requests to the server, as it incurs costs and has limits on the number of requests. Your consideration will help ensure that everyone can use the service without excessive spending on my side.
+1. Since we are using AWS services Lambda and S3, please be mindful and use it only for testing purposes. Avoid making too many requests to the server, as it incurs costs and has limits on the number of requests. Your consideration will help ensure that everyone can use the service without excessive spending on my side.
 2. The model was trained on Google Collab and thus is not very well trained to provide highly accurate translations due to limited resources and training time. However, it still does a noteworthy job. The purpose of this project is to offer a streamlined process that anyone can utilize and experiment with using their own resources.
 
 ---
