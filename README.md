@@ -18,6 +18,7 @@ Welcome to the **Transformer Model Reproduction** repository! This project imple
 - [Model Staging](#model-staging)
 - [Web Application](#web-app)
 - [AWS Lambda (Serverless Deployment)](#aws-lambda-serverless-deployment)
+- [Hugging Face Spaces](#aws-lambda-serverless-deployment)
 - [Contributing](#contributing)
 
 ---
@@ -239,6 +240,20 @@ To run the script, use:
 ```bash
 ./deploy.sh
 ```
+
+---
+
+## Hugging Face Spaces
+
+This repository includes a deployed version of the Streamlit application on **Hugging Face Spaces**. This allows users to interact with the transformer model effortlessly without needing to set up any environment or run code locally.
+
+- **Interactive Streamlit Application**: The application is hosted on Hugging Face Spaces, providing a user-friendly interface to interact with the transformer model. Users can access it directly via the following link:
+
+  [Visit the Hugging Face Spaces App](https://huggingface.co/spaces/ammar-20112001/Attention-Is-All-You-Need-reproduced)
+
+This setup utilizes serverless deployment on **AWS Lambda** to handle inference requests, ensuring a smooth experience for anyone wanting to play around with the model.
+
+**Disclaimer**: If the inference time is longer than expected, it may be due to the cold start of the Lambda server. This delay typically only occurs the first time the model is invoked after a period of inactivity.
 
 ---
 
