@@ -1,6 +1,13 @@
-#  Attention Is All You Need | Transformer Model Reproduction and Experimentation Framework
+##  Attention Is All You Need | Transformer Model Reproduction and Experimentation Framework | Serverless Deployment Configuration with Minimal UI
 
-Welcome to the **Transformer Model Reproduction** repository! This project implements a flexible framework for experimenting with transformer architectures using **PyTorch** and **PyTorch Lightning**, along with **Weights and Biases (wandb)** for tracking and managing experiments.
+Welcome to the **Transformer Model Reproduction** repository! This project implements a flexible framework for experimenting with transformer architectures using **PyTorch** and **PyTorch Lightning**, along with **Weights and Biases (wandb)** for tracking and managing experiments. The repository provides multiple deployment options, including a serverless architecture using **AWS Lambda** and **S3**, as well as a hosted version on **Hugging Face Spaces** for easy interaction with the model, making it accessible to users without requiring local setup.
+
+To access model directly and interact with it, visit the following link:
+[Visit the Hugging Face Spaces App](https://huggingface.co/spaces/ammar-20112001/Attention-Is-All-You-Need-reproduced)
+
+**Important Notes:**
+1. Since we are using AWS services Lambda and S3, please be kind and use it only for testing purposes. Avoid making too many requests to the server, as it incurs costs and has limits on the number of requests. Your consideration will help ensure that everyone can use the service without excessive spending on my side.
+2. The model was trained on Google Collab and thus is not very well trained to provide highly accurate translations due to limited resources and training time. However, it still does a noteworthy job. The purpose of this project is to offer a streamlined process that anyone can utilize and experiment with using their own resources.
 
 ---
 
@@ -25,7 +32,7 @@ Welcome to the **Transformer Model Reproduction** repository! This project imple
 
 ## Overview
 
-This repository aims to reproduce the transformer model architecture from scratch using **PyTorch**, making the code highly modular and customizable. It includes training loops, hyperparameter tuning, and experiment tracking features to aid machine learning engineers and researchers in quickly setting up and testing transformer-based models.
+This repository aims to reproduce the transformer model architecture from scratch using **PyTorch**, making the code highly modular and customizable. It includes training loops, hyperparameter tuning, and experiment tracking features to aid machine learning engineers and researchers in quickly setting up and testing transformer-based models. The project also provides multiple deployment options, including a serverless architecture using **AWS Lambda** and **S3**, as well as a hosted version on **Hugging Face Spaces** for easy and direct interaction with the model (to directly interact with the model, see [Hugging Face Spaces](#aws-lambda-serverless-deployment)).
 
 ---
 
@@ -50,6 +57,9 @@ These components are implemented using **plain PyTorch** for a hands-on understa
 - **Flexible Experiment Configuration:** All hyperparameters and model settings can be adjusted via a single YAML configuration file.
 - **Sweep Support:** Automate running multiple experiments via wandb sweeps with provided command templates.
 - **Interactive Notebooks:** Pre-built notebooks with commands for training, validation, and tracking, reducing boilerplate code.
+- **Web Applications**: Includes Flask-based applications and a Streamlit app, offering various deployment configurations for interacting with the transformer model.
+- **Serverless Deployment**: Leverages **AWS Lambda** and **S3** for serverless model deployment, ensuring scalability and ease of access.
+- **Hugging Face Spaces**: A hosted version of the Streamlit application allows users to interact with the model directly via a web interface without needing to set up any local environment.
 
 ---
 
