@@ -15,6 +15,9 @@ Welcome to the **Transformer Model Reproduction** repository! This project imple
   - [Alternative: Run Experiments in Google Colab](#run-experiment-in-google-colab)
 - [Configuration](#configuration)
 - [Results & Tracking](#results--tracking)
+- [Model Staging](#model-staging)
+- [Web Application](#web-app)
+- [AWS Lambda (Serverless Deployment)](#aws-lambda-serverless-deployment)
 - [Contributing](#contributing)
 
 ---
@@ -177,6 +180,65 @@ wandb login
 If you're not logged in, you'll be prompted to do so when you run experiment.
 
 For more details on wandb usage, refer to the [official documentation](https://docs.wandb.ai/).
+
+---
+
+## Model Staging
+
+The `stage_model.py` script provides functionality to stage a transformer model for production. It pulls a trained model artifact from **Weights and Biases (wandb)**, converts it to **TorchScript**, and prepares it for deployment. Here’s a breakdown of its key functionalities:
+
+1. **Downloading Model Artifact**: The script downloads a specific model version from a wandb artifact repository into a local directory, `Models/`, which is created if it doesn’t already exist.
+
+2. **TorchScript Conversion**: After downloading, the PyTorch model is loaded and converted to **TorchScript**, making it compatible with production environments.
+
+3. **Saving for Production**: The TorchScript version of the model is saved locally as `model.pt` and is also uploaded back to wandb for other access.
+
+To use the staging script, run the following command with appropriate arguments:
+
+```bash
+python stage_model.py --fetch --entity <wandb_entity> --from_project <wandb_project_name> --artifact <artifact_name> --version <artifact_version>
+```
+
+Replace `<wandb_entity>`, `<wandb_project_name>`, `<artifact_name>`, and `<artifact_version>` with your specific values.
+
+---
+
+## Web Application
+
+This repository includes three web applications, each with different deployment configurations:
+
+- **Flask_AWSlambda**: This app is a Flask-based interface for interacting with the transformer model, deployed as a service on **AWS Lambda** and **S3**. To run it, use `flaskapi.py`.
+```bash
+  flask --app flaskapi run
+  ```
+  
+- **Flask_ModelInService**: This Flask app loads the transformer model directly in the server, without relying on external services for inference. Launch it with `flaskapi.py`.
+```bash
+  flask --app flaskapi run
+  ```
+  
+- **Streamlit_AWSlambda**: This app uses Streamlit and connects to a model-as-a-service deployment on **AWS Lambda**. Run it with `app.py`.
+```bash
+  streamlit run app.py
+  ```
+
+---
+
+## AWS Lambda (Serverless Deployment)
+
+The model and its dependencies are packaged and deployed on AWS Lambda and S3 for serverless deployment. This setup uses a `.sh` file to manage dependencies and ensure a streamlined production environment. Here’s a breakdown of the deployment steps:
+
+1. **Dependency Packaging**: The script copies all dependencies from the `.venv` directory, manually removes any unnecessary files, and minimizes the package size by excluding certain directories and files.
+
+2. **Zipping Components**: The `torch` library and other dependencies are zipped separately (`torch.zip` and `dependencies.zip`), reducing the package size. 
+
+3. **S3 and Lambda Deployment**: Finally, the script uploads the `dependencies.zip` and `torch.zip` files to an S3 bucket, then updates the Lambda function code directly from S3.
+
+To run the script, use:
+
+```bash
+./deploy.sh
+```
 
 ---
 
