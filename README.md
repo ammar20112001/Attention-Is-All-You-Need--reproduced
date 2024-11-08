@@ -11,6 +11,33 @@ To access model directly and interact with it, visit the following link:
 
 ---
 
+## 🛠️ Tech Stack
+
+Python, PyTorch, PyTorch Lightning, Weights and Biases (wandb), Hugging Face Spaces, AWS Lambda, S3, Streamlit, Flask, Git
+
+<div align="left">
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" height="40" alt="python logo"  />
+  <img width="12" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" height="40" alt="pytorch logo"  />
+  <img width="12" />
+  <img src="https://i.ibb.co/jb9xddb/pytorch-lightning-logo.png" height="40" alt="ligthning logo"  />
+  <img width="12" />
+  <img src="https://i.ibb.co/QmRmd7M/simple-icons-weightsandbiases.png" height="40" alt="wandb logo"  />
+  <img width="12" />
+  <img src="https://i.ibb.co/BzLrJQ2/hf-logo.png" height="40" alt="transformers logo"  />
+  <img width="12" />
+  <img src="https://i.ibb.co/fNqxY7R/aws-lambda-1024x1021.png" height="40" alt="aws lambda logo"  />
+  <img width="12" />
+  <img src="https://i.ibb.co/z55CzGz/streamlit-logo.png" alt="Streamlit" height="50"/>
+  <img width="12" />
+  <img src="https://i.ibb.co/hH6HpkF/file-icons-flask.png" height="40" alt="flask logo"  />
+  <img width="12" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" height="40" alt="git logo"  />
+</div>
+
+
+---
+
 ## Table of Contents
 - [Overview](#overview)
 - [Architecture](#architecture)
